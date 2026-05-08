@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('education_steps', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('education_article_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->string('title', 160)->nullable();
+            $table->text('body')->nullable();
+            $table->string('image_path')->nullable();
+            $table->string('youtube_url', 500)->nullable();
+            $table->timestamps();
+
+            $table->index(['education_article_id', 'sort_order']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('education_steps');
+    }
+};
