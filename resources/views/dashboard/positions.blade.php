@@ -185,6 +185,9 @@
                                                 <x-icon name="trending-up" class="h-3 w-3" />
                                                 {{ $signal->sideLabel() }} {{ $signal->leverageValue() }}x
                                             </span>
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-ink-500/40 bg-ink-800/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-200">
+                                                {{ $signal->termLabel() }}
+                                            </span>
                                             <span class="inline-flex items-center gap-1 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] {{ $toneClass($signal) }}">
                                                 {{ $signal->statusLabel() }}
                                             </span>

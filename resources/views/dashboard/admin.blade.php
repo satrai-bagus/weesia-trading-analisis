@@ -152,6 +152,13 @@
                                 <option value="{{ \App\Models\TradeSignal::SIDE_SHORT }}" @selected(old('position_side') === \App\Models\TradeSignal::SIDE_SHORT)>Short</option>
                             </select>
                         </label>
+                        <label>
+                            <span class="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-gold-300">Jangka Signal</span>
+                            <select name="signal_term" required class="min-h-11 w-full rounded-2xl border border-ink-700/70 bg-ink-800/60 px-4 py-3 text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                <option value="{{ \App\Models\TradeSignal::TERM_SHORT }}" @selected(old('signal_term', \App\Models\TradeSignal::TERM_SHORT) === \App\Models\TradeSignal::TERM_SHORT)>Short Term</option>
+                                <option value="{{ \App\Models\TradeSignal::TERM_LONG }}" @selected(old('signal_term') === \App\Models\TradeSignal::TERM_LONG)>Long Term</option>
+                            </select>
+                        </label>
                         <x-form-field label="Take Profit 1" name="take_profit" placeholder="71420" />
                         <x-form-field label="Stop Loss" name="stop_loss" placeholder="66930" />
                         <label>
@@ -274,6 +281,7 @@
                                         </div>
                                         <div class="flex flex-wrap gap-2">
                                             <span class="inline-flex w-fit rounded-full border border-gold-500/25 bg-gold-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-gold-200">{{ $signal->sideLabel() }} {{ $signal->leverageValue() }}x</span>
+                                            <span class="inline-flex w-fit rounded-full border border-ink-500/40 bg-ink-800/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-200">{{ $signal->termLabel() }}</span>
                                             <span class="inline-flex w-fit rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] {{ $toneClass($signal) }}">{{ $signal->statusLabel() }}</span>
                                         </div>
                                     </div>
@@ -339,6 +347,13 @@
                                                 <select name="position_side" class="mt-1 block w-full rounded-xl border border-ink-700/70 bg-ink-900 px-3 py-2 text-sm text-ink-100 outline-none focus:border-gold-500/50">
                                                     <option value="{{ \App\Models\TradeSignal::SIDE_LONG }}" @selected($signal->position_side === \App\Models\TradeSignal::SIDE_LONG)>Long</option>
                                                     <option value="{{ \App\Models\TradeSignal::SIDE_SHORT }}" @selected($signal->position_side === \App\Models\TradeSignal::SIDE_SHORT)>Short</option>
+                                                </select>
+                                            </label>
+                                            <label class="block">
+                                                <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">Jangka Signal</span>
+                                                <select name="signal_term" class="mt-1 block w-full rounded-xl border border-ink-700/70 bg-ink-900 px-3 py-2 text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                                    <option value="{{ \App\Models\TradeSignal::TERM_SHORT }}" @selected($signal->signal_term === \App\Models\TradeSignal::TERM_SHORT)>Short Term</option>
+                                                    <option value="{{ \App\Models\TradeSignal::TERM_LONG }}" @selected($signal->signal_term === \App\Models\TradeSignal::TERM_LONG)>Long Term</option>
                                                 </select>
                                             </label>
                                             <label class="block">
