@@ -235,6 +235,7 @@
                                             </div>
                                             <div class="flex flex-wrap gap-2">
                                                 <span class="inline-flex w-fit rounded-full border border-gold-500/25 bg-gold-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-gold-200">{{ $signal->sideLabel() }} {{ $signal->leverageValue() }}x</span>
+                                                <span class="inline-flex w-fit rounded-full border border-ink-500/40 bg-ink-800/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-200">{{ $signal->termLabel() }}</span>
                                                 <span class="inline-flex w-fit rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] {{ $toneClass($signal) }}">{{ $signal->statusLabel() }}</span>
                                                 <span class="inline-flex w-fit items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-200">
                                                     <x-icon name="check-circle" class="h-3 w-3" />
@@ -362,6 +363,7 @@
                                                 </div>
                                                 <div class="flex flex-wrap gap-2">
                                                     <span class="inline-flex w-fit rounded-full border border-gold-500/25 bg-gold-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-gold-200">{{ $signal->sideLabel() }} {{ $signal->leverageValue() }}x</span>
+                                                    <span class="inline-flex w-fit rounded-full border border-ink-500/40 bg-ink-800/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-200">{{ $signal->termLabel() }}</span>
                                                     <span class="inline-flex w-fit rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] {{ $toneClass($signal) }}">{{ $signal->statusLabel() }}</span>
                                                 </div>
                                             </div>

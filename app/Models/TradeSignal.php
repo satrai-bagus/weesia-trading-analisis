@@ -20,6 +20,10 @@ class TradeSignal extends Model
 
     public const SIDE_SHORT = 'short';
 
+    public const TERM_SHORT = 'short_term';
+
+    public const TERM_LONG = 'long_term';
+
     protected $fillable = [
         'ticker',
         'image_path',
@@ -28,6 +32,7 @@ class TradeSignal extends Model
         'take_profit_2',
         'stop_loss',
         'position_side',
+        'signal_term',
         'leverage',
         'coin_cost',
         'status',
@@ -90,6 +95,11 @@ class TradeSignal extends Model
     public function sideLabel(): string
     {
         return $this->position_side === self::SIDE_SHORT ? 'Short' : 'Long';
+    }
+
+    public function termLabel(): string
+    {
+        return $this->signal_term === self::TERM_LONG ? 'Long Term' : 'Short Term';
     }
 
     public function leverageValue(): int

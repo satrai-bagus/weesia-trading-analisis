@@ -20,6 +20,7 @@ class TradeSignalController extends Controller
             'ticker' => ['required', 'string', 'max:30'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'position_side' => ['required', Rule::in([TradeSignal::SIDE_LONG, TradeSignal::SIDE_SHORT])],
+            'signal_term' => ['required', Rule::in([TradeSignal::TERM_SHORT, TradeSignal::TERM_LONG])],
             'leverage' => ['required', 'integer', 'min:1', 'max:125'],
             'take_profit' => ['required', 'numeric', 'gt:0'],
             'has_take_profit_2' => ['nullable', 'boolean'],
@@ -58,6 +59,7 @@ class TradeSignalController extends Controller
             'take_profit_2' => $takeProfit2,
             'stop_loss' => $validated['stop_loss'],
             'position_side' => $validated['position_side'],
+            'signal_term' => $validated['signal_term'],
             'leverage' => $validated['leverage'],
             'created_by_id' => Auth::id(),
         ]);
@@ -100,6 +102,7 @@ class TradeSignalController extends Controller
         $validated = $request->validate([
             'ticker' => ['required', 'string', 'max:30'],
             'position_side' => ['required', Rule::in([TradeSignal::SIDE_LONG, TradeSignal::SIDE_SHORT])],
+            'signal_term' => ['required', Rule::in([TradeSignal::TERM_SHORT, TradeSignal::TERM_LONG])],
             'leverage' => ['required', 'integer', 'min:1', 'max:125'],
             'take_profit' => ['required', 'numeric', 'gt:0'],
             'take_profit_2' => ['nullable', 'numeric', 'gt:0'],
@@ -124,6 +127,7 @@ class TradeSignalController extends Controller
         $tradeSignal->forceFill([
             'ticker' => $ticker,
             'position_side' => $validated['position_side'],
+            'signal_term' => $validated['signal_term'],
             'leverage' => (int) $validated['leverage'],
             'take_profit' => (float) $validated['take_profit'],
             'take_profit_2' => $takeProfit2,
