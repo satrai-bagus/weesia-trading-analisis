@@ -28,3 +28,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+.htaccess
+.htaccess.bak
+.htaccess.bak2
+/public/.htaccess
