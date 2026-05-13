@@ -16,9 +16,10 @@
             $canAccess = fn ($signal) => $accessMap[$signal->id] ?? false;
             $entryFor = fn ($signal) => $signal->entry_price ?: ($priceMap[$signal->ticker] ?? null);
             $liveFor = fn ($signal) => $priceMap[$signal->ticker] ?? null;
+            $liveRefFor = fn ($signal) => $liveFor($signal) ?: $entryFor($signal);
             $usd = fn ($value) => $value ? '$'.$fmt($value) : '-';
             $percent = fn ($value) => $value === null ? '-' : ($value > 0 ? '+' : '').rtrim(rtrim(number_format($value, 2, '.', ','), '0'), '.').'%';
-            $roiTo = fn ($signal, $target) => $target ? $signal->leveragedMoveTo((float) $target, $entryFor($signal)) : null;
+            $roiTo = fn ($signal, $target) => $target ? $signal->leveragedMoveTo((float) $target, $liveRefFor($signal)) : null;
 
             $positionCount = $signalSelections->where('type', \App\Models\UserSignalPosition::TYPE_POSITION)->count();
             $watchlistCount = $signalSelections->where('type', \App\Models\UserSignalPosition::TYPE_WATCHLIST)->count();
@@ -141,7 +142,7 @@
                     </div>
                 </div>
 
-                <div data-position-grid class="grid grid-cols-1 gap-5">
+                <div data-position-grid data-live-roi-scope class="grid grid-cols-1 gap-5">
                     @foreach ($signalSelections as $selection)
                         @php
                             $signal = $selection->tradeSignal;
@@ -153,6 +154,14 @@
 
                         <article
                             data-position-item
+                            data-signal-row
+                            data-signal-ticker="{{ $signal->ticker }}"
+                            data-signal-side="{{ $signal->position_side }}"
+                            data-signal-leverage="{{ $signal->leverageValue() }}"
+                            data-signal-tp1="{{ $signal->take_profit }}"
+                            data-signal-tp2="{{ $signal->take_profit_2 }}"
+                            data-signal-sl="{{ $signal->stop_loss }}"
+                            data-signal-live="{{ $liveFor($signal) }}"
                             data-filter-type="{{ $selection->type }}"
                             data-filter-ticker="{{ $tickerKey }}"
                             class="overflow-hidden rounded-3xl border border-ink-700/60 bg-gradient-to-b from-ink-900/95 to-ink-900/70 shadow-[0_30px_80px_-50px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-all hover:border-gold-500/30">
@@ -211,16 +220,15 @@
                                             <x-level label="Stop Loss" :value="$fmt($signal->stop_loss)" tone="rose" />
                                         </div>
 
-                                        <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
-                                            <x-level label="Entry" :value="$usd($entryFor($signal))" tone="gold" />
-                                            <x-level label="Live" :value="$usd($liveFor($signal))" data-live-price-card data-live-price-ticker="{{ $signal->ticker }}" />
-                                            <x-level label="ROI TP1" :value="$percent($roiTo($signal, $signal->take_profit))" tone="emerald" />
-                                            <x-level label="ROI TP2" :value="$signal->take_profit_2 ? $percent($roiTo($signal, $signal->take_profit_2)) : '-'" tone="emerald" />
-                                            <x-level label="Risk SL" :value="$percent($roiTo($signal, $signal->stop_loss))" tone="rose" />
+                                        <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                                            <x-level label="Entry (Live)" :value="$usd($liveRefFor($signal))" tone="gold" data-entry-level />
+                                            <x-level label="ROI TP1" :value="$percent($roiTo($signal, $signal->take_profit))" tone="emerald" data-roi-tp1 />
+                                            <x-level label="ROI TP2" :value="$signal->take_profit_2 ? $percent($roiTo($signal, $signal->take_profit_2)) : '-'" tone="emerald" data-roi-tp2 />
+                                            <x-level label="Risk SL" :value="$percent($roiTo($signal, $signal->stop_loss))" tone="rose" data-roi-sl />
                                         </div>
 
                                         <p class="mt-4 text-sm leading-relaxed text-ink-300">
-                                            {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Signal masih berjalan. Estimasi ROI memakai entry publish dan leverage signal.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss. Evaluasi risk sebelum entry berikutnya.' : 'Harga sudah mencapai target profit.') }}
+                                            {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Signal masih berjalan. Estimasi ROI memakai harga live realtime sebagai entry.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss. Evaluasi risk sebelum entry berikutnya.' : 'Harga sudah mencapai target profit.') }}
                                         </p>
 
                                         <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
@@ -242,7 +250,7 @@
                                                 <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                                                     <label class="block">
                                                         <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-300">Harga Entry Kamu (USD)</span>
-                                                        <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $entryFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                                        <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $liveRefFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
                                                     </label>
                                                     <div data-entry-result class="rounded-2xl border border-ink-700 bg-ink-900 p-3">
                                                         <div class="flex items-center justify-between gap-2">

@@ -324,7 +324,7 @@
                                             <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                                                 <label class="block">
                                                     <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-300">Harga Entry Kamu (USD)</span>
-                                                    <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $entryFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                                    <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $liveRefFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
                                                 </label>
                                                 <div data-entry-result class="rounded-2xl border border-ink-700 bg-ink-900 p-3">
                                                     <div class="flex items-center justify-between gap-2">

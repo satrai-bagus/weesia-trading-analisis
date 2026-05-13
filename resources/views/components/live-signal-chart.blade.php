@@ -1,8 +1,9 @@
 @props(['signal', 'entry' => null, 'current' => null])
 
 @php
-    $entryValue = $entry ?: $signal->entry_price ?: (($signal->take_profit + $signal->stop_loss) / 2);
-    $currentValue = $current ?: $entryValue;
+    $fallbackValue = $entry ?: $signal->entry_price ?: (($signal->take_profit + $signal->stop_loss) / 2);
+    $currentValue = $current ?: $fallbackValue;
+    $entryValue = $currentValue;
     $tp2Value = $signal->take_profit_2 ?: '';
     $sideValue = $signal->position_side ?: \App\Models\TradeSignal::SIDE_LONG;
     $leverageValue = $signal->leverageValue();
@@ -13,6 +14,7 @@
     data-chart-ticker="{{ $signal->ticker }}"
     data-chart-entry="{{ $entryValue }}"
     data-chart-current="{{ $currentValue }}"
+    data-chart-show-entry="false"
     data-chart-tp1="{{ $signal->take_profit }}"
     data-chart-tp2="{{ $tp2Value }}"
     data-chart-sl="{{ $signal->stop_loss }}"
@@ -28,6 +30,7 @@
         data-chart-ticker="{{ $signal->ticker }}"
         data-chart-entry="{{ $entryValue }}"
         data-chart-current="{{ $currentValue }}"
+        data-chart-show-entry="false"
         data-chart-tp1="{{ $signal->take_profit }}"
         data-chart-tp2="{{ $tp2Value }}"
         data-chart-sl="{{ $signal->stop_loss }}"

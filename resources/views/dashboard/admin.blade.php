@@ -271,7 +271,7 @@
 
                     <div class="grid grid-cols-1 gap-4" data-carousel-list>
                         @forelse ($signals as $signal)
-                            <article data-carousel-item class="grid grid-cols-1 overflow-hidden rounded-2xl border border-ink-700/60 bg-ink-900 transition-colors hover:bg-ink-800/45 lg:grid-cols-[390px_minmax(0,1fr)] xl:grid-cols-[430px_minmax(0,1fr)]">
+                            <article data-carousel-item data-signal-row data-signal-ticker="{{ $signal->ticker }}" data-signal-side="{{ $signal->position_side }}" data-signal-leverage="{{ $signal->leverageValue() }}" data-signal-tp1="{{ $signal->take_profit }}" data-signal-tp2="{{ $signal->take_profit_2 }}" data-signal-sl="{{ $signal->stop_loss }}" data-signal-live="{{ $liveFor($signal) }}" class="grid grid-cols-1 overflow-hidden rounded-2xl border border-ink-700/60 bg-ink-900 transition-colors hover:bg-ink-800/45 lg:grid-cols-[390px_minmax(0,1fr)] xl:grid-cols-[430px_minmax(0,1fr)]">
                                 <x-live-signal-chart :signal="$signal" :entry="$entryFor($signal)" :current="$liveFor($signal)" />
                                 <div class="p-4 sm:p-5">
                                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -291,10 +291,10 @@
                                         <x-level label="Stop Loss" :value="$fmt($signal->stop_loss)" tone="rose" />
                                     </div>
                                     <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                                        <x-level label="Entry (Live)" :value="$usd($liveRefFor($signal))" tone="gold" data-live-price-card data-live-price-ticker="{{ $signal->ticker }}" />
-                                        <x-level label="ROI TP1" :value="$percent($roiTo($signal, $signal->take_profit))" tone="emerald" />
-                                        <x-level label="ROI TP2" :value="$signal->take_profit_2 ? $percent($roiTo($signal, $signal->take_profit_2)) : '-'" tone="emerald" />
-                                        <x-level label="Risk SL" :value="$percent($roiTo($signal, $signal->stop_loss))" tone="rose" />
+                                        <x-level label="Entry (Live)" :value="$usd($liveRefFor($signal))" tone="gold" data-entry-level />
+                                        <x-level label="ROI TP1" :value="$percent($roiTo($signal, $signal->take_profit))" tone="emerald" data-roi-tp1 />
+                                        <x-level label="ROI TP2" :value="$signal->take_profit_2 ? $percent($roiTo($signal, $signal->take_profit_2)) : '-'" tone="emerald" data-roi-tp2 />
+                                        <x-level label="Risk SL" :value="$percent($roiTo($signal, $signal->stop_loss))" tone="rose" data-roi-sl />
                                     </div>
                                     <p class="mt-4 text-sm leading-relaxed text-ink-300">
                                         {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Signal masih berjalan. Estimasi ROI memakai harga live realtime sebagai entry.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss.' : 'Harga sudah mencapai target profit.') }}
@@ -321,6 +321,37 @@
                                                     {{ ($signal->unlocks_count ?? 0) }} buka / {{ ($signal->user_positions_count ?? 0) }} pos
                                                 </span>
                                             @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 rounded-2xl border border-ink-700/60 bg-ink-800/45 p-4"
+                                         data-user-entry
+                                         data-signal-id="admin-{{ $signal->id }}"
+                                         data-signal-ticker="{{ $signal->ticker }}"
+                                         data-signal-side="{{ $signal->position_side }}"
+                                         data-signal-leverage="{{ $signal->leverageValue() }}"
+                                         data-signal-live="{{ $liveFor($signal) }}">
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gold-500/30 bg-gold-500/10 text-gold-200">
+                                                <x-icon name="target" class="h-4 w-4" />
+                                            </span>
+                                            <div class="font-display text-sm text-ink-50">Simulasi Posisi Admin</div>
+                                            <span class="ml-auto font-mono text-[9px] uppercase tracking-[0.22em] text-ink-300">Live P/L</span>
+                                        </div>
+
+                                        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                                            <label class="block">
+                                                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-300">Harga Entry Simulasi (USD)</span>
+                                                <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $liveRefFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                            </label>
+                                            <div data-entry-result class="rounded-2xl border border-ink-700 bg-ink-900 p-3">
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span data-entry-direction class="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-300">Belum Diisi</span>
+                                                    <span data-entry-icon class="text-ink-300"><x-icon name="activity" class="h-4 w-4" /></span>
+                                                </div>
+                                                <div data-entry-pnl class="mt-1 font-display text-2xl leading-none text-ink-200">-</div>
+                                                <div data-entry-detail class="mt-1 font-mono text-[10px] text-ink-300">Masukkan harga entry untuk lihat estimasi P/L</div>
+                                            </div>
                                         </div>
                                     </div>
 

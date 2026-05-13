@@ -616,6 +616,7 @@ function readChartConfig(element) {
         sl: sl || entry || current || 1,
         side: element.dataset.chartSide === 'short' ? 'short' : 'long',
         leverage,
+        showEntry: element.dataset.chartShowEntry !== 'false',
     };
 }
 
@@ -860,16 +861,6 @@ function setupLivePriceCards() {
 }
 
 function setupSignalLiveRoi() {
-    const carousel = document.querySelector('[data-signal-carousel]');
-    if (!carousel) return;
-
-    const list = carousel.querySelector('[data-carousel-list]');
-    if (!list) return;
-
-    const allItems = Array.from(carousel.querySelectorAll('[data-carousel-item]'));
-    const rows = Array.from(carousel.querySelectorAll('[data-signal-row]'));
-    if (!rows.length) return;
-
     const formatUsd = (value) => {
         if (!Number.isFinite(value) || value <= 0) return '-';
         const formatted = new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
@@ -891,80 +882,94 @@ function setupSignalLiveRoi() {
         return move * leverage;
     };
 
-    const lastPrices = new Map();
+    const scopes = Array.from(new Set([
+        ...document.querySelectorAll('[data-signal-carousel]'),
+        ...document.querySelectorAll('[data-live-roi-scope]'),
+    ]));
 
-    rows.forEach((row) => {
-        const ticker = row.dataset.signalTicker;
-        const initial = Number(row.dataset.signalLive);
-        if (ticker && Number.isFinite(initial) && initial > 0) {
-            lastPrices.set(ticker, initial);
-        }
-    });
+    scopes.forEach((scope) => {
+        const list = scope.querySelector('[data-carousel-list]');
+        const allItems = list ? Array.from(scope.querySelectorAll('[data-carousel-item]')) : [];
+        const rows = Array.from(scope.querySelectorAll('[data-signal-row]'));
+        if (!rows.length) return;
 
-    const updateRow = (row) => {
-        const ticker = row.dataset.signalTicker;
-        const live = lastPrices.get(ticker);
-        const tp1 = Number(row.dataset.signalTp1);
-        const tp2Raw = Number(row.dataset.signalTp2);
-        const tp2 = Number.isFinite(tp2Raw) && tp2Raw > 0 ? tp2Raw : null;
-        const sl = Number(row.dataset.signalSl);
-        const side = row.dataset.signalSide === 'short' ? 'short' : 'long';
-        const leverage = Math.max(Number(row.dataset.signalLeverage || 1), 1);
+        const lastPrices = new Map();
 
-        const entryEl = row.querySelector('[data-entry-level] [data-level-value]');
-        if (entryEl && Number.isFinite(live) && live > 0) {
-            entryEl.textContent = formatUsd(live);
-        }
-
-        const roiTp1 = computeRoi(live, tp1, side, leverage);
-        const roiTp2 = tp2 ? computeRoi(live, tp2, side, leverage) : null;
-        const roiSl = computeRoi(live, sl, side, leverage);
-
-        const tp1El = row.querySelector('[data-roi-tp1] [data-level-value]');
-        const tp2El = row.querySelector('[data-roi-tp2] [data-level-value]');
-        const slEl = row.querySelector('[data-roi-sl] [data-level-value]');
-
-        if (tp1El) tp1El.textContent = formatPercent(roiTp1);
-        if (tp2El) tp2El.textContent = tp2 ? formatPercent(roiTp2) : '-';
-        if (slEl) slEl.textContent = formatPercent(roiSl);
-
-        const candidates = [roiTp1, roiTp2].filter((value) => Number.isFinite(value));
-        const sortKey = candidates.length ? Math.max(...candidates) : Number.NEGATIVE_INFINITY;
-        row.dataset.sortRoi = String(sortKey);
-    };
-
-    const sortItems = () => {
-        const sorted = [...allItems].sort((a, b) => {
-            const av = a.hasAttribute('data-signal-row') ? Number(a.dataset.sortRoi) : Number.NEGATIVE_INFINITY;
-            const bv = b.hasAttribute('data-signal-row') ? Number(b.dataset.sortRoi) : Number.NEGATIVE_INFINITY;
-            const aSafe = Number.isFinite(av) ? av : Number.NEGATIVE_INFINITY;
-            const bSafe = Number.isFinite(bv) ? bv : Number.NEGATIVE_INFINITY;
-            return bSafe - aSafe;
-        });
-
-        const fragment = document.createDocumentFragment();
-        sorted.forEach((node) => fragment.appendChild(node));
-        list.appendChild(fragment);
-
-        carousel.__signalCarousel?.render?.();
-    };
-
-    rows.forEach(updateRow);
-    sortItems();
-
-    window.addEventListener('weesia:prices', (event) => {
-        const prices = event.detail || {};
-        let touched = false;
-        Object.entries(prices).forEach(([ticker, price]) => {
-            const num = Number(price);
-            if (Number.isFinite(num) && num > 0) {
-                lastPrices.set(ticker, num);
-                touched = true;
+        rows.forEach((row) => {
+            const ticker = row.dataset.signalTicker;
+            const initial = Number(row.dataset.signalLive);
+            if (ticker && Number.isFinite(initial) && initial > 0) {
+                lastPrices.set(ticker, initial);
             }
         });
-        if (!touched) return;
+
+        const updateRow = (row) => {
+            const ticker = row.dataset.signalTicker;
+            const live = lastPrices.get(ticker);
+            const tp1 = Number(row.dataset.signalTp1);
+            const tp2Raw = Number(row.dataset.signalTp2);
+            const tp2 = Number.isFinite(tp2Raw) && tp2Raw > 0 ? tp2Raw : null;
+            const sl = Number(row.dataset.signalSl);
+            const side = row.dataset.signalSide === 'short' ? 'short' : 'long';
+            const leverage = Math.max(Number(row.dataset.signalLeverage || 1), 1);
+
+            const entryEl = row.querySelector('[data-entry-level] [data-level-value]');
+            if (entryEl && Number.isFinite(live) && live > 0) {
+                entryEl.textContent = formatUsd(live);
+            }
+
+            const roiTp1 = computeRoi(live, tp1, side, leverage);
+            const roiTp2 = tp2 ? computeRoi(live, tp2, side, leverage) : null;
+            const roiSl = computeRoi(live, sl, side, leverage);
+
+            const tp1El = row.querySelector('[data-roi-tp1] [data-level-value]');
+            const tp2El = row.querySelector('[data-roi-tp2] [data-level-value]');
+            const slEl = row.querySelector('[data-roi-sl] [data-level-value]');
+
+            if (tp1El) tp1El.textContent = formatPercent(roiTp1);
+            if (tp2El) tp2El.textContent = tp2 ? formatPercent(roiTp2) : '-';
+            if (slEl) slEl.textContent = formatPercent(roiSl);
+
+            const candidates = [roiTp1, roiTp2].filter((value) => Number.isFinite(value));
+            const sortKey = candidates.length ? Math.max(...candidates) : Number.NEGATIVE_INFINITY;
+            row.dataset.sortRoi = String(sortKey);
+        };
+
+        const sortItems = () => {
+            if (!list || !allItems.length) return;
+
+            const sorted = [...allItems].sort((a, b) => {
+                const av = a.hasAttribute('data-signal-row') ? Number(a.dataset.sortRoi) : Number.NEGATIVE_INFINITY;
+                const bv = b.hasAttribute('data-signal-row') ? Number(b.dataset.sortRoi) : Number.NEGATIVE_INFINITY;
+                const aSafe = Number.isFinite(av) ? av : Number.NEGATIVE_INFINITY;
+                const bSafe = Number.isFinite(bv) ? bv : Number.NEGATIVE_INFINITY;
+                return bSafe - aSafe;
+            });
+
+            const fragment = document.createDocumentFragment();
+            sorted.forEach((node) => fragment.appendChild(node));
+            list.appendChild(fragment);
+
+            scope.__signalCarousel?.render?.();
+        };
+
         rows.forEach(updateRow);
         sortItems();
+
+        window.addEventListener('weesia:prices', (event) => {
+            const prices = event.detail || {};
+            let touched = false;
+            Object.entries(prices).forEach(([ticker, price]) => {
+                const num = Number(price);
+                if (Number.isFinite(num) && num > 0) {
+                    lastPrices.set(ticker, num);
+                    touched = true;
+                }
+            });
+            if (!touched) return;
+            rows.forEach(updateRow);
+            sortItems();
+        });
     });
 }
 
@@ -1552,7 +1557,9 @@ function createLiveSignalChart(container, config) {
         if (tp2Y) {
             drawLevel('TP2', config.tp2, tp2Y, '#6fe0a8', chartX, chartRight, compact);
         }
-        drawLevel('ENTRY', config.entry, entryY, '#d4a72c', chartX, chartRight, compact, false);
+        if (config.showEntry) {
+            drawLevel('ENTRY', config.entry, entryY, '#d4a72c', chartX, chartRight, compact, false);
+        }
         drawLevel('SL', config.sl, slY, '#fda4af', chartX, chartRight, compact);
         drawLevel('LIVE', state.price, liveY, state.price >= config.entry ? '#fbeeb6' : '#fda4af', chartX, chartRight, compact, false);
 
@@ -1569,12 +1576,14 @@ function createLiveSignalChart(container, config) {
         const gap = compact ? 8 : 18;
         const metricH = compact ? 48 : 88;
         const metricW = (state.width - pad * 2 - gap * 2) / 3;
-        drawMetric(pad, bottomY, metricW, metricH, compact ? 'ENTRY' : 'ENTRY', money(config.entry), '#f5f3ee', compact ? '' : config.ticker);
+        drawMetric(pad, bottomY, metricW, metricH, config.showEntry ? 'ENTRY' : 'LIVE', money(config.showEntry ? config.entry : state.price), '#f5f3ee', compact ? '' : config.ticker);
         drawMetric(pad + metricW + gap, bottomY, metricW, metricH, 'TP1', money(config.tp1), '#6fe0a8', compact ? '' : percent(config.tp1));
         drawMetric(pad + (metricW + gap) * 2, bottomY, metricW, metricH, 'SL', money(config.sl), '#f5df76', compact ? '' : percent(config.sl));
 
         if (!compact) {
-            drawText(`Live ${money(state.price)}  /  Entry ${money(config.entry)}  /  PnL ${percent(state.price)}`, pad, state.height - 28, {
+            drawText(config.showEntry
+                ? `Live ${money(state.price)}  /  Entry ${money(config.entry)}  /  PnL ${percent(state.price)}`
+                : `Live ${money(state.price)}  /  TP1 ${percent(config.tp1)}  /  Risk ${percent(config.sl)}`, pad, state.height - 28, {
                 color: '#8a877e',
                 size: 11,
                 letterSpacing: 2,
@@ -1652,6 +1661,9 @@ function createLiveSignalChart(container, config) {
 
             state.marketPrice = price;
             config.current = price;
+            if (!config.showEntry) {
+                config.entry = price;
+            }
         },
         resize() {
             resize();
