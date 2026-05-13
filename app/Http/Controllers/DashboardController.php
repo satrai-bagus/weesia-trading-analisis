@@ -20,6 +20,20 @@ class DashboardController extends Controller
             return redirect()->route('user.dashboard');
         }
 
+        return view('dashboard.admin', $this->adminSignalPayload($marketData, $autoHit));
+    }
+
+    public function adminSignals(CryptoMarketData $marketData, SignalAutoHit $autoHit): View|RedirectResponse
+    {
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('user.dashboard');
+        }
+
+        return view('dashboard.admin-signals', $this->adminSignalPayload($marketData, $autoHit));
+    }
+
+    private function adminSignalPayload(CryptoMarketData $marketData, SignalAutoHit $autoHit): array
+    {
         $signals = TradeSignal::with('createdBy')->latest()->get();
         $priceMap = $marketData->pricesForTickers($signals->pluck('ticker'));
         $autoHit->evaluate($signals, $priceMap);
@@ -28,12 +42,12 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        return view('dashboard.admin', [
+        return [
             'signals' => $signals,
             'stats' => $this->stats(),
             'marketTickers' => $marketData->usdtTickers(),
             'priceMap' => $priceMap,
-        ]);
+        ];
     }
 
     public function user(CryptoMarketData $marketData, SignalAutoHit $autoHit): View

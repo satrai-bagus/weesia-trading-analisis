@@ -48,7 +48,7 @@
                         <h1 class="mt-5 max-w-3xl font-display text-4xl leading-[1.05] text-ink-50 sm:text-6xl">Kontrol penuh sistem Weesia.</h1>
                         <p class="mt-6 max-w-2xl text-base leading-relaxed text-ink-200">Pantau user, validasi signal, audit performa engine, dan jaga risk framework tetap disiplin dari satu panel operasional.</p>
                         <div class="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-                            <a href="#publish-signal" class="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)] sm:px-6">
+                            <a href="{{ route('admin.signals') }}" class="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)] sm:px-6">
                                 <x-icon name="target" class="h-4 w-4" />
                                 Publish Signal
                                 <x-icon name="arrow-up-right" class="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -106,7 +106,7 @@
 
         <section class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
             <div class="space-y-6">
-                <div id="publish-signal" class="reveal rounded-2xl border border-ink-700/60 bg-ink-900/75 p-4 backdrop-blur-xl sm:p-5">
+                <div id="publish-signal" class="hidden">
                     <div class="mb-5 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gold-500/20 bg-gold-500/10 text-gold-200">
@@ -240,7 +240,7 @@
                     </form>
                 </div>
 
-                <div class="reveal rounded-2xl border border-ink-700/60 bg-ink-900/75 p-4 backdrop-blur-xl sm:p-5" data-signal-carousel data-page-size="7">
+                <div class="hidden" data-signal-carousel data-page-size="7">
                     <div class="mb-5 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gold-500/20 bg-gold-500/10 text-gold-200">

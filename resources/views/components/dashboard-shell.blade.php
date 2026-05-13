@@ -57,6 +57,7 @@
             @if (auth()->user()->role === 'admin')
                 <nav class="hidden items-center gap-1 md:flex">
                     {!! $navLink('admin', route('admin.dashboard'), 'Dashboard') !!}
+                    {!! $navLink('admin-signals', route('admin.signals'), 'Signal') !!}
                     {!! $navLink('admin-users', route('admin.users'), 'User') !!}
                     {!! $navLink('admin-orders', route('admin.orders'), 'Pesanan') !!}
                     {!! $navLink('admin-live-sessions', route('admin.live-sessions'), 'Live Session') !!}
@@ -153,6 +154,7 @@
         @if (auth()->user()->role === 'admin')
             <nav class="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-3 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Admin navigation mobile">
                 {!! $navLink('admin', route('admin.dashboard'), 'Dashboard') !!}
+                {!! $navLink('admin-signals', route('admin.signals'), 'Signal') !!}
                 {!! $navLink('admin-users', route('admin.users'), 'User') !!}
                 {!! $navLink('admin-orders', route('admin.orders'), 'Pesanan') !!}
                 {!! $navLink('admin-live-sessions', route('admin.live-sessions'), 'Live Session') !!}

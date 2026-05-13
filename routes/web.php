@@ -57,6 +57,7 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
+    Route::get('/admin/signals', [DashboardController::class, 'adminSignals'])->name('admin.signals');
     Route::get('/user', [DashboardController::class, 'user'])->name('user.dashboard');
     Route::get('/posisi', [DashboardController::class, 'positions'])->name('user.positions');
     Route::get('/live', [DashboardController::class, 'live'])->name('user.live');
