@@ -21,11 +21,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-Route::get('/', [LandingController::class, 'index'])->withoutMiddleware([
-    StartSession::class,
-    ShareErrorsFromSession::class,
-    ValidateCsrfToken::class,
-])->name('landing');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
 
 Route::get('/landing/market-tickers', [LandingController::class, 'marketTickers'])
     ->withoutMiddleware([
