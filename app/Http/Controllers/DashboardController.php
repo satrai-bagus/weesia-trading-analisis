@@ -150,9 +150,9 @@ class DashboardController extends Controller
             ->map(fn ($id) => (int) $id)
             ->all();
         $accessMap = $signalSelections->mapWithKeys(fn ($sel) => [
-            $sel->trade_signal_id => $sel->tradeSignal->status !== TradeSignal::STATUS_ACTIVE
+            (int) $sel->trade_signal_id => $sel->tradeSignal->status !== TradeSignal::STATUS_ACTIVE
                 || $hasSubscription
-                || in_array($sel->trade_signal_id, $unlockedIds, true),
+                || in_array((int) $sel->trade_signal_id, $unlockedIds, true),
         ])->all();
 
         return view('dashboard.positions', [

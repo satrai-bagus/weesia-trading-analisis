@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\SignalUnlock;
 use App\Models\TradeSignal;
 use App\Models\User;
 use App\Models\UserSignalPosition;
@@ -79,6 +80,38 @@ class UserSignalPositionTest extends TestCase
             'trade_signal_id' => $signal->id,
             'type' => UserSignalPosition::TYPE_WATCHLIST,
         ]);
+    }
+
+    public function test_unlocked_signal_stays_accessible_on_positions_page(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'coin_balance' => 4,
+            'subscription_until' => null,
+        ]);
+        $signal = $this->signal([
+            'ticker' => 'ETH/USDT',
+            'coin_cost' => 1,
+        ]);
+
+        SignalUnlock::create([
+            'user_id' => $user->id,
+            'trade_signal_id' => $signal->id,
+            'coin_cost' => 1,
+            'unlocked_at' => now(),
+        ]);
+        UserSignalPosition::create([
+            'user_id' => $user->id,
+            'trade_signal_id' => $signal->id,
+            'type' => UserSignalPosition::TYPE_POSITION,
+            'selected_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('user.positions'))
+            ->assertOk()
+            ->assertSee('Terbuka')
+            ->assertDontSee('Buka Lagi');
     }
 
     public function test_user_can_remove_saved_signal_choice(): void
