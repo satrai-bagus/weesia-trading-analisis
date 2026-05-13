@@ -58,7 +58,10 @@ class DashboardController extends Controller
         $signals = TradeSignal::with('createdBy')->latest()->get();
 
         $user = Auth::user();
-        $unlockedIds = $user->signalUnlocks()->pluck('trade_signal_id')->all();
+        $unlockedIds = $user->signalUnlocks()
+            ->pluck('trade_signal_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
         $hasSubscription = $user->hasActiveSubscription();
         $accessMap = $signals->mapWithKeys(fn ($signal) => [
             $signal->id => $signal->status !== TradeSignal::STATUS_ACTIVE
@@ -142,7 +145,10 @@ class DashboardController extends Controller
             ->values();
 
         $hasSubscription = $user->hasActiveSubscription();
-        $unlockedIds = $user->signalUnlocks()->pluck('trade_signal_id')->all();
+        $unlockedIds = $user->signalUnlocks()
+            ->pluck('trade_signal_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
         $accessMap = $signalSelections->mapWithKeys(fn ($sel) => [
             $sel->trade_signal_id => $sel->tradeSignal->status !== TradeSignal::STATUS_ACTIVE
                 || $hasSubscription
