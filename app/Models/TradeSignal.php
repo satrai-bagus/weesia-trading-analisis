@@ -121,4 +121,23 @@ class TradeSignal extends Model
 
         return $move * $this->leverageValue();
     }
+
+    public function isClosed(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_HIT_TP,
+            self::STATUS_HIT_TP2,
+            self::STATUS_HIT_SL,
+        ], true);
+    }
+
+    public function closePrice(): ?float
+    {
+        return match ($this->status) {
+            self::STATUS_HIT_TP => $this->take_profit ? (float) $this->take_profit : null,
+            self::STATUS_HIT_TP2 => $this->take_profit_2 ? (float) $this->take_profit_2 : null,
+            self::STATUS_HIT_SL => $this->stop_loss ? (float) $this->stop_loss : null,
+            default => null,
+        };
+    }
 }

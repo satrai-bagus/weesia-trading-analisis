@@ -606,6 +606,9 @@ function readChartConfig(element) {
     const tp2 = chartNumber(element.dataset.chartTp2);
     const sl = chartNumber(element.dataset.chartSl, current || entry);
     const leverage = Math.max(Number(element.dataset.chartLeverage || 75), 1);
+    const frozen = element.dataset.chartFrozen === 'true';
+    const closePrice = chartNumber(element.dataset.chartClosePrice);
+    const closeLabel = element.dataset.chartCloseLabel || '';
 
     return {
         ticker: element.dataset.chartTicker || 'BTC/USDT',
@@ -617,6 +620,9 @@ function readChartConfig(element) {
         side: element.dataset.chartSide === 'short' ? 'short' : 'long',
         leverage,
         showEntry: element.dataset.chartShowEntry !== 'false',
+        frozen,
+        closePrice,
+        closeLabel,
     };
 }
 
@@ -1376,7 +1382,7 @@ function createLiveSignalChart(container, config) {
             return;
         }
 
-        if (animate && !reducedMotion) {
+        if (animate && !reducedMotion && !config.frozen) {
             updatePrice(now);
         }
 
@@ -1561,12 +1567,21 @@ function createLiveSignalChart(container, config) {
             drawLevel('ENTRY', config.entry, entryY, '#d4a72c', chartX, chartRight, compact, false);
         }
         drawLevel('SL', config.sl, slY, '#fda4af', chartX, chartRight, compact);
-        drawLevel('LIVE', state.price, liveY, state.price >= config.entry ? '#fbeeb6' : '#fda4af', chartX, chartRight, compact, false);
+        const liveLabel = config.frozen
+            ? (config.closeLabel ? config.closeLabel.toUpperCase() : 'CLOSED')
+            : 'LIVE';
+        const liveColor = config.frozen
+            ? (config.closeLabel && config.closeLabel.toLowerCase().includes('sl') ? '#fda4af' : '#6fe0a8')
+            : (state.price >= config.entry ? '#fbeeb6' : '#fda4af');
+        drawLevel(liveLabel, state.price, liveY, liveColor, chartX, chartRight, compact, false);
 
         context.beginPath();
         context.arc(chartRight, liveY, compact ? 5 : 7, 0, Math.PI * 2);
-        context.fillStyle = state.price >= config.entry ? '#6fe0a8' : '#fda4af';
-        context.shadowColor = state.price >= config.entry ? 'rgba(47, 199, 124, 0.75)' : 'rgba(244, 63, 94, 0.75)';
+        const dotIsLoss = config.frozen
+            ? (config.closeLabel && config.closeLabel.toLowerCase().includes('sl'))
+            : state.price < config.entry;
+        context.fillStyle = dotIsLoss ? '#fda4af' : '#6fe0a8';
+        context.shadowColor = dotIsLoss ? 'rgba(244, 63, 94, 0.75)' : 'rgba(47, 199, 124, 0.75)';
         context.shadowBlur = 16;
         context.fill();
         context.shadowBlur = 0;
@@ -1576,7 +1591,8 @@ function createLiveSignalChart(container, config) {
         const gap = compact ? 8 : 18;
         const metricH = compact ? 48 : 88;
         const metricW = (state.width - pad * 2 - gap * 2) / 3;
-        drawMetric(pad, bottomY, metricW, metricH, config.showEntry ? 'ENTRY' : 'LIVE', money(config.showEntry ? config.entry : state.price), '#f5f3ee', compact ? '' : config.ticker);
+        const bottomLabel = config.showEntry ? 'ENTRY' : (config.frozen ? 'CLOSED' : 'LIVE');
+        drawMetric(pad, bottomY, metricW, metricH, bottomLabel, money(config.showEntry ? config.entry : state.price), '#f5f3ee', compact ? '' : config.ticker);
         drawMetric(pad + metricW + gap, bottomY, metricW, metricH, 'TP1', money(config.tp1), '#6fe0a8', compact ? '' : percent(config.tp1));
         drawMetric(pad + (metricW + gap) * 2, bottomY, metricW, metricH, 'SL', money(config.sl), '#f5df76', compact ? '' : percent(config.sl));
 
@@ -1606,6 +1622,13 @@ function createLiveSignalChart(container, config) {
 
     const tick = (now) => {
         if (!state.visible || !state.pageVisible) {
+            stop();
+            return;
+        }
+
+        if (config.frozen) {
+            draw(now, false);
+            state.lastFrame = now;
             stop();
             return;
         }
@@ -1655,7 +1678,7 @@ function createLiveSignalChart(container, config) {
     return {
         config,
         setMarketPrice(price) {
-            if (!Number.isFinite(price) || price <= 0) {
+            if (!Number.isFinite(price) || price <= 0 || config.frozen) {
                 return;
             }
 

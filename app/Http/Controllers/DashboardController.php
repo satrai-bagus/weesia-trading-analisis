@@ -52,10 +52,20 @@ class DashboardController extends Controller
 
     public function user(CryptoMarketData $marketData, SignalAutoHit $autoHit): View
     {
-        $signals = TradeSignal::with('createdBy')->latest()->get();
-        $priceMap = $marketData->pricesForTickers($signals->pluck('ticker'));
-        $autoHit->evaluate($signals, $priceMap);
-        $signals = TradeSignal::with('createdBy')->latest()->get();
+        $allSignals = TradeSignal::with('createdBy')->latest()->get();
+        $priceMap = $marketData->pricesForTickers($allSignals->pluck('ticker'));
+        $autoHit->evaluate($allSignals, $priceMap);
+
+        $signals = TradeSignal::with('createdBy')
+            ->where('status', TradeSignal::STATUS_ACTIVE)
+            ->get()
+            ->sortByDesc(function (TradeSignal $signal) use ($priceMap) {
+                $live = $priceMap[$signal->ticker] ?? null;
+                $roi = $signal->leveragedMoveTo((float) $signal->take_profit, $live ? (float) $live : null);
+
+                return $roi ?? -INF;
+            })
+            ->values();
 
         $user = Auth::user();
         $unlockedIds = $user->signalUnlocks()
@@ -64,14 +74,18 @@ class DashboardController extends Controller
             ->all();
         $hasSubscription = $user->hasActiveSubscription();
         $accessMap = $signals->mapWithKeys(fn ($signal) => [
-            $signal->id => $signal->status !== TradeSignal::STATUS_ACTIVE
-                || $hasSubscription
-                || in_array($signal->id, $unlockedIds, true),
+            $signal->id => $hasSubscription || in_array($signal->id, $unlockedIds, true),
         ])->all();
         $signalSelections = $user->signalPositions()
             ->with('tradeSignal.createdBy')
             ->latest('selected_at')
             ->get();
+
+        $archiveCount = TradeSignal::whereIn('status', [
+            TradeSignal::STATUS_HIT_TP,
+            TradeSignal::STATUS_HIT_TP2,
+            TradeSignal::STATUS_HIT_SL,
+        ])->count();
 
         return view('dashboard.user', [
             'signals' => $signals,
@@ -84,6 +98,36 @@ class DashboardController extends Controller
             'coinBalance' => (int) $user->coin_balance,
             'subscriptionUntil' => $user->subscription_until,
             'liveSession' => $this->upcomingLiveSession(),
+            'archiveCount' => $archiveCount,
+        ]);
+    }
+
+    public function archive(CryptoMarketData $marketData, SignalAutoHit $autoHit): View
+    {
+        $allSignals = TradeSignal::with('createdBy')->latest()->get();
+        $priceMap = $marketData->pricesForTickers($allSignals->pluck('ticker'));
+        $autoHit->evaluate($allSignals, $priceMap);
+
+        $signals = TradeSignal::with('createdBy')
+            ->whereIn('status', [
+                TradeSignal::STATUS_HIT_TP,
+                TradeSignal::STATUS_HIT_TP2,
+                TradeSignal::STATUS_HIT_SL,
+            ])
+            ->orderByDesc('auto_hit_at')
+            ->orderByDesc('updated_at')
+            ->get();
+
+        $tickerFilters = $signals->pluck('ticker')->unique()->values();
+        $tpCount = $signals->whereIn('status', [TradeSignal::STATUS_HIT_TP, TradeSignal::STATUS_HIT_TP2])->count();
+        $slCount = $signals->where('status', TradeSignal::STATUS_HIT_SL)->count();
+
+        return view('dashboard.archive', [
+            'signals' => $signals,
+            'priceMap' => $priceMap,
+            'tickerFilters' => $tickerFilters,
+            'tpCount' => $tpCount,
+            'slCount' => $slCount,
         ]);
     }
 

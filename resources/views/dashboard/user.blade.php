@@ -56,7 +56,7 @@
             });
             $lockedCount = $signals->filter(fn ($s) => ! $canAccess($s))->count();
             $unlockedCount = $signals->count() - $lockedCount;
-            $freeArchiveCount = $signals->filter(fn ($s) => $s->status !== \App\Models\TradeSignal::STATUS_ACTIVE)->count();
+            $archiveCount = $archiveCount ?? 0;
             $tickerFilters = $signals->pluck('ticker')->unique()->values();
         @endphp
 
@@ -126,10 +126,10 @@
                     <div>
                         @if ($hasSubscription)
                             <div class="font-display text-lg text-ink-50">Akses Penuh Aktif</div>
-                            <div class="mt-1 text-xs text-ink-300">Subscription aktif sampai {{ $subscriptionUntil->format('d M Y') }} - semua {{ $signals->count() }} analisa terbuka.</div>
+                            <div class="mt-1 text-xs text-ink-300">Subscription aktif sampai {{ $subscriptionUntil->format('d M Y') }} - semua {{ $signals->count() }} analisa aktif terbuka. <a href="{{ route('user.archive') }}" class="text-gold-200 underline-offset-4 hover:underline">Lihat arsip TP/SL ({{ $archiveCount }})</a>.</div>
                         @else
                             <div class="font-display text-lg text-ink-50">Mode Per-Analisa</div>
-                            <div class="mt-1 text-xs text-ink-300">Saldo {{ number_format($coinBalance, 0, ',', '.') }} koin - {{ $lockedCount }} signal aktif terkunci. {{ $freeArchiveCount > 0 ? $freeArchiveCount.' arsip TP/SL terbuka gratis.' : 'Signal selesai akan otomatis terbuka gratis.' }}</div>
+                            <div class="mt-1 text-xs text-ink-300">Saldo {{ number_format($coinBalance, 0, ',', '.') }} koin - {{ $lockedCount }} signal aktif terkunci. <a href="{{ route('user.archive') }}" class="text-gold-200 underline-offset-4 hover:underline">{{ $archiveCount }} arsip TP/SL gratis</a>.</div>
                         @endif
                     </div>
                 </div>
@@ -174,7 +174,7 @@
                     </div>
 
                     <div class="mb-5 rounded-2xl border border-ink-700/60 bg-ink-800/35 p-3 sm:p-4">
-                        <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.5fr)_180px_180px_auto]">
+                        <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.5fr)_220px_auto]">
                             <label class="relative">
                                 <span class="sr-only">Cari ticker crypto</span>
                                 <x-icon name="search" class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" />
@@ -191,18 +191,6 @@
                                     <option value="all">Semua Posisi</option>
                                     <option value="{{ \App\Models\TradeSignal::SIDE_LONG }}">Long Only</option>
                                     <option value="{{ \App\Models\TradeSignal::SIDE_SHORT }}">Short Only</option>
-                                </select>
-                            </label>
-                            <label>
-                                <span class="sr-only">Filter status signal</span>
-                                <select data-signal-status-filter class="min-h-12 w-full rounded-2xl border border-ink-700/70 bg-ink-900/80 px-4 py-3 text-sm text-ink-100 outline-none focus:border-gold-500/50">
-                                    <option value="all">Semua Status</option>
-                                    <option value="{{ \App\Models\TradeSignal::STATUS_ACTIVE }}">Aktif / Running</option>
-                                    <option value="tp">Sudah TP</option>
-                                    <option value="{{ \App\Models\TradeSignal::STATUS_HIT_TP }}">Kena TP1</option>
-                                    <option value="{{ \App\Models\TradeSignal::STATUS_HIT_TP2 }}">Kena TP2</option>
-                                    <option value="{{ \App\Models\TradeSignal::STATUS_HIT_SL }}">Kena SL</option>
-                                    <option value="closed">Arsip TP/SL</option>
                                 </select>
                             </label>
                             <button type="button" data-signal-filter-clear class="inline-flex min-h-12 items-center justify-center rounded-2xl border border-ink-700/70 bg-ink-900/80 px-4 text-sm font-medium text-ink-200 transition-colors hover:border-gold-500/50 hover:text-gold-100">

@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/signals', [DashboardController::class, 'adminSignals'])->name('admin.signals');
     Route::get('/user', [DashboardController::class, 'user'])->name('user.dashboard');
     Route::get('/posisi', [DashboardController::class, 'positions'])->name('user.positions');
+    Route::get('/arsip', [DashboardController::class, 'archive'])->name('user.archive');
     Route::get('/live', [DashboardController::class, 'live'])->name('user.live');
     Route::get('/edukasi', [EducationController::class, 'index'])->name('education.index');
     Route::get('/edukasi/{educationArticle}', [EducationController::class, 'show'])->name('education.show');

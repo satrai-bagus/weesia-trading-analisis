@@ -67,6 +67,7 @@
                 <nav class="hidden items-center gap-1 md:flex">
                     {!! $navLink('user', route('user.dashboard'), 'Analisa') !!}
                     {!! $navLink('positions', route('user.positions'), 'Posisi Saya') !!}
+                    {!! $navLink('archive', route('user.archive'), 'Arsip Gratis') !!}
                     @if ($navLiveSession)
                         <a href="{{ route('user.live') }}"
                            aria-label="Halaman sesi live trading"
@@ -164,6 +165,7 @@
             <nav class="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-3 md:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="User navigation mobile">
                 {!! $navLink('user', route('user.dashboard'), 'Analisa') !!}
                 {!! $navLink('positions', route('user.positions'), 'Posisi Saya') !!}
+                {!! $navLink('archive', route('user.archive'), 'Arsip Gratis') !!}
                 @if ($navLiveSession)
                     <a href="{{ route('user.live') }}"
                        aria-label="Halaman sesi live trading"

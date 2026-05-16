@@ -1,25 +1,39 @@
-@props(['signal', 'entry' => null, 'current' => null])
+@props(['signal', 'entry' => null, 'current' => null, 'frozen' => null])
 
 @php
+    $isFrozen = $frozen ?? $signal->isClosed();
+    $closePrice = $signal->closePrice();
     $fallbackValue = $entry ?: $signal->entry_price ?: (($signal->take_profit + $signal->stop_loss) / 2);
-    $currentValue = $current ?: $fallbackValue;
-    $entryValue = $currentValue;
+    $liveValue = $current ?: $fallbackValue;
+    $endValue = $isFrozen && $closePrice ? $closePrice : $liveValue;
+    $entryValue = $isFrozen
+        ? ($signal->entry_price ?: $fallbackValue)
+        : $endValue;
     $tp2Value = $signal->take_profit_2 ?: '';
     $sideValue = $signal->position_side ?: \App\Models\TradeSignal::SIDE_LONG;
     $leverageValue = $signal->leverageValue();
+    $closeLabel = match ($signal->status) {
+        \App\Models\TradeSignal::STATUS_HIT_TP => 'Kena TP1',
+        \App\Models\TradeSignal::STATUS_HIT_TP2 => 'Kena TP2',
+        \App\Models\TradeSignal::STATUS_HIT_SL => 'Kena SL',
+        default => '',
+    };
 @endphp
 
 <div
     data-fullscreen-live-chart
     data-chart-ticker="{{ $signal->ticker }}"
     data-chart-entry="{{ $entryValue }}"
-    data-chart-current="{{ $currentValue }}"
+    data-chart-current="{{ $endValue }}"
     data-chart-show-entry="false"
     data-chart-tp1="{{ $signal->take_profit }}"
     data-chart-tp2="{{ $tp2Value }}"
     data-chart-sl="{{ $signal->stop_loss }}"
     data-chart-side="{{ $sideValue }}"
     data-chart-leverage="{{ $leverageValue }}"
+    data-chart-frozen="{{ $isFrozen ? 'true' : 'false' }}"
+    data-chart-close-price="{{ $closePrice ?: '' }}"
+    data-chart-close-label="{{ $closeLabel }}"
     role="button"
     tabindex="0"
     aria-label="Buka chart {{ $signal->ticker }} fullscreen"
@@ -29,19 +43,27 @@
         data-live-signal-chart
         data-chart-ticker="{{ $signal->ticker }}"
         data-chart-entry="{{ $entryValue }}"
-        data-chart-current="{{ $currentValue }}"
+        data-chart-current="{{ $endValue }}"
         data-chart-show-entry="false"
         data-chart-tp1="{{ $signal->take_profit }}"
         data-chart-tp2="{{ $tp2Value }}"
         data-chart-sl="{{ $signal->stop_loss }}"
         data-chart-side="{{ $sideValue }}"
         data-chart-leverage="{{ $leverageValue }}"
+        data-chart-frozen="{{ $isFrozen ? 'true' : 'false' }}"
+        data-chart-close-price="{{ $closePrice ?: '' }}"
+        data-chart-close-label="{{ $closeLabel }}"
         class="live-trading-chart h-full min-h-[430px] w-full sm:min-h-[460px] lg:min-h-full"
     ></div>
     <span
-        class="absolute top-3 right-3 z-20 inline-flex h-9 items-center gap-2 rounded-full border border-gold-500/30 bg-ink-900/85 px-3 text-xs font-medium text-gold-100 backdrop-blur-md transition-all hover:border-gold-400/70 hover:bg-gold-500/15"
+        class="absolute top-3 right-3 z-20 inline-flex h-9 items-center gap-2 rounded-full border {{ $isFrozen ? 'border-rose-500/30 text-rose-100' : 'border-gold-500/30 text-gold-100' }} bg-ink-900/85 px-3 text-xs font-medium backdrop-blur-md transition-all hover:bg-ink-800/85"
     >
-        <x-icon name="search" class="h-4 w-4" />
-        <span class="hidden sm:inline">Fullscreen</span>
+        @if ($isFrozen)
+            <x-icon name="check-circle" class="h-4 w-4" />
+            <span class="hidden sm:inline">{{ $closeLabel ?: 'Closed' }}</span>
+        @else
+            <x-icon name="search" class="h-4 w-4" />
+            <span class="hidden sm:inline">Fullscreen</span>
+        @endif
     </span>
 </div>
