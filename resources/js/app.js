@@ -438,6 +438,8 @@ function setupSignalCarousels() {
         });
 
         next?.addEventListener('click', () => {
+            const visibleItems = items.filter((item) => item.dataset.filterHidden !== 'true');
+            const pageCount = Math.max(Math.ceil(visibleItems.length / pageSize), 1);
             page = Math.min(page + 1, pageCount - 1);
             render();
         });
