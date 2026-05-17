@@ -33,7 +33,7 @@ class PaymentOrderController extends Controller
 
         [$type, $config] = $this->resolvePackage($validated['package_key']);
 
-        if (! $config) {
+        if (!$config) {
             return back()->withErrors(['package_key' => 'Paket tidak valid.']);
         }
 
@@ -60,7 +60,7 @@ class PaymentOrderController extends Controller
 
     public function show(PaymentOrder $order): View|RedirectResponse
     {
-        abort_unless($order->user_id === Auth::id() || Auth::user()->role === 'admin', 403);
+        abort_unless($order->user_id == Auth::id() && Auth::user()->role === 'user', 403);
 
         return view('dashboard.order-show', [
             'order' => $order->load('user'),
@@ -70,7 +70,7 @@ class PaymentOrderController extends Controller
 
     public function uploadProof(Request $request, PaymentOrder $order): RedirectResponse
     {
-        abort_unless($order->user_id === Auth::id(), 403);
+        abort_unless($order->user_id == Auth::id(), 403);
         abort_if($order->isFinalized(), 422, 'Order sudah selesai diproses.');
 
         $validated = $request->validate([
@@ -104,7 +104,7 @@ class PaymentOrderController extends Controller
 
     public function cancel(PaymentOrder $order): RedirectResponse
     {
-        abort_unless($order->user_id === Auth::id(), 403);
+        abort_unless($order->user_id == Auth::id(), 403);
         abort_if($order->isFinalized(), 422);
 
         if ($order->status === PaymentOrder::STATUS_PENDING) {

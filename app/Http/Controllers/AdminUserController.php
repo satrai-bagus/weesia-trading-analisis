@@ -24,9 +24,9 @@ class AdminUserController extends Controller
 
         $users = User::orderByDesc('id')
             ->withCount(['signalUnlocks', 'signalPositions', 'tradeSignals'])
-            ->withSum(['coinTransactions as total_topup' => fn ($q) => $q->where('type', CoinTransaction::TYPE_TOPUP)], 'amount')
-            ->withSum(['coinTransactions as total_subscription' => fn ($q) => $q->where('type', CoinTransaction::TYPE_SUBSCRIPTION)], 'amount')
-            ->withSum(['coinTransactions as total_spent' => fn ($q) => $q->where('amount', '<', 0)], 'amount')
+            ->withSum(['coinTransactions as total_topup' => fn($q) => $q->where('type', CoinTransaction::TYPE_TOPUP)], 'amount')
+            ->withSum(['coinTransactions as total_subscription' => fn($q) => $q->where('type', CoinTransaction::TYPE_SUBSCRIPTION)], 'amount')
+            ->withSum(['coinTransactions as total_spent' => fn($q) => $q->where('amount', '<', 0)], 'amount')
             ->get();
 
         $transactions = CoinTransaction::with(['user', 'createdBy', 'tradeSignal'])
@@ -36,13 +36,13 @@ class AdminUserController extends Controller
 
         $stats = [
             'total_users' => $users->count(),
-            'subscribers' => $users->filter(fn (User $u) => $u->hasActiveSubscription())->count(),
+            'subscribers' => $users->filter(fn(User $u) => $u->hasActiveSubscription())->count(),
             'total_coins' => (int) $users->sum('coin_balance'),
             'total_topup' => (int) CoinTransaction::where('type', CoinTransaction::TYPE_TOPUP)->sum('amount'),
         ];
 
         $topUsers = $users
-            ->filter(fn (User $u) => $u->role === 'user')
+            ->filter(fn(User $u) => $u->role === 'user')
             ->map(function (User $u) {
                 $u->lifetime_value = (int) $u->total_topup + abs((int) $u->total_subscription);
                 return $u;
@@ -70,7 +70,7 @@ class AdminUserController extends Controller
             'password' => ['nullable', 'string', 'min:6', 'max:191'],
         ]);
 
-        if ($user->id === Auth::id() && $validated['role'] !== 'admin') {
+        if ($user->id == Auth::id() && $validated['role'] !== 'admin') {
             return back()->withErrors(['role' => 'Tidak bisa demote akun sendiri dari admin.']);
         }
 
@@ -80,7 +80,7 @@ class AdminUserController extends Controller
             'role' => $validated['role'],
         ];
 
-        if (! empty($validated['password'])) {
+        if (!empty($validated['password'])) {
             $updates['password'] = Hash::make($validated['password']);
         }
 
@@ -93,7 +93,7 @@ class AdminUserController extends Controller
     {
         abort_unless(Auth::user()->role === 'admin', 403);
 
-        if ($user->id === Auth::id()) {
+        if ($user->id == Auth::id()) {
             return back()->withErrors(['delete' => 'Tidak bisa menghapus akun sendiri.']);
         }
 
