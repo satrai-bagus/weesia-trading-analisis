@@ -78,7 +78,9 @@
                     </button>
 
                     <p class="text-center text-xs leading-relaxed text-ink-400">
-                        Daftar pakai Google &mdash; otomatis dapat <span class="text-gold-200">5 token gratis</span> untuk coba analisa pertama kamu.
+                        Belum punya akun?
+                        <a href="{{ route('register') }}" class="text-gold-200 transition-colors hover:text-gold-100">Daftar dengan email</a>
+                        atau pakai Google untuk dapat <span class="text-gold-200">5 token gratis</span>.
                     </p>
 
                     <a href="{{ route('landing') }}" class="inline-flex w-full items-center justify-center text-sm text-ink-300 transition-colors hover:text-gold-200">Kembali ke halaman utama</a>

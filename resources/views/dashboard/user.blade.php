@@ -518,6 +518,36 @@
             </div>
         </div>
 
+        <div data-modal="registration-success" @if (! session('registration_success')) hidden @endif class="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-ink-900/85 p-4 backdrop-blur-xl sm:items-center sm:p-6">
+            <div class="relative w-full max-w-lg rounded-2xl border border-gold-500/20 bg-ink-900/95 p-5 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] sm:rounded-3xl sm:p-7">
+                <button type="button" data-modal-close aria-label="Tutup" class="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink-600/70 text-ink-200 transition-all hover:border-gold-500/50 hover:text-gold-100">
+                    <x-icon name="x" class="h-4 w-4" />
+                </button>
+
+                <div class="pr-10">
+                    <span class="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-200">
+                        <x-icon name="check-circle" class="h-7 w-7" />
+                    </span>
+                    <div class="mt-5 font-mono text-[10px] uppercase tracking-[0.26em] text-gold-300">Registrasi Berhasil</div>
+                    <h2 class="mt-3 font-display text-3xl leading-tight text-ink-50">Selamat datang, {{ auth()->user()->name }}.</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-ink-300">
+                        Akun kamu sudah aktif dan siap digunakan untuk melihat analisa trading, menyimpan pantauan, dan mengelola akses sinyal dari dashboard.
+                    </p>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <a href="#signals" data-modal-close class="inline-flex items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-ink-900 transition-colors hover:bg-gold-300">
+                        <x-icon name="target" class="h-4 w-4" />
+                        Lihat Analisa
+                    </a>
+                    <a href="{{ route('checkout') }}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-ink-700 px-5 py-3 text-sm text-ink-200 transition-colors hover:border-gold-500/50 hover:text-gold-100">
+                        <x-icon name="wallet" class="h-4 w-4" />
+                        Beli Token
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div data-modal="unlock-confirm" hidden class="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-ink-900/85 p-4 backdrop-blur-xl sm:items-center sm:p-6">
             <div class="relative w-full max-w-md rounded-2xl border border-gold-500/20 bg-ink-900/95 p-4 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] sm:rounded-3xl sm:p-7">
                 <div class="flex items-start justify-between gap-3">
