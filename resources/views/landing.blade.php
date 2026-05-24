@@ -210,8 +210,16 @@
                             <a class="text-ink-200 hover:bg-ink-800/60 hover:text-ink-50 rounded-lg px-3 py-2 text-sm"
                                 href="{{ $link['href'] }}">{{ $link['label'] }}</a>
                         @endforeach
-                        <a class="border-gold-500/30 bg-gold-500/10 text-gold-200 mt-2 rounded-lg border px-3 py-2 text-center text-sm"
-                            href="{{ route('login') }}">Login</a>
+                        @if (auth()->user()?->role == 'admin')
+                            <a class="border-gold-500/30 bg-gold-500/10 text-gold-200 mt-2 rounded-lg border px-3 py-2 text-center text-sm"
+                                href="{{ route('admin.dashboard') }}">Dashboard</a>
+                        @elseif (auth()->user()?->role == 'user')
+                            <a class="border-gold-500/30 bg-gold-500/10 text-gold-200 mt-2 rounded-lg border px-3 py-2 text-center text-sm"
+                                href="{{ route('user.dashboard') }}">Mulai Analisa</a>
+                        @else
+                            <a class="border-gold-500/30 bg-gold-500/10 text-gold-200 mt-2 rounded-lg border px-3 py-2 text-center text-sm"
+                                href="{{ route('login') }}">Login</a>
+                        @endif
                     </div>
                 </div>
             </div>

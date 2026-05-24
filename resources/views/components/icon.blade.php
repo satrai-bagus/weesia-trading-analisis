@@ -148,6 +148,12 @@
             <circle cx="12" cy="8" r="4" />
             <path d="M4 21a8 8 0 0 1 16 0" />
             @break
+        @case('user-plus')
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M19 8v6" />
+            <path d="M16 11h6" />
+            @break
         @case('video')
             <rect x="3" y="6" width="13" height="12" rx="2" />
             <path d="m22 8-6 4 6 4V8Z" />

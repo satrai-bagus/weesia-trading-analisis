@@ -77,10 +77,14 @@
                         <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </button>
 
+                    <a href="{{ route('register') }}" class="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-gold-500/35 bg-gold-500/10 px-6 py-3.5 text-sm font-semibold text-gold-100 transition-all hover:border-gold-400/70 hover:bg-gold-500/15 hover:text-gold-50">
+                        <x-icon name="user-plus" class="h-4 w-4" />
+                        Daftar Akun Baru
+                        <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </a>
+
                     <p class="text-center text-xs leading-relaxed text-ink-400">
-                        Belum punya akun?
-                        <a href="{{ route('register') }}" class="text-gold-200 transition-colors hover:text-gold-100">Daftar dengan email</a>
-                        atau pakai Google untuk dapat <span class="text-gold-200">5 token gratis</span>.
+                        Akun baru juga bisa pakai Google untuk dapat <span class="text-gold-200">5 token gratis</span>.
                     </p>
 
                     <a href="{{ route('landing') }}" class="inline-flex w-full items-center justify-center text-sm text-ink-300 transition-colors hover:text-gold-200">Kembali ke halaman utama</a>
