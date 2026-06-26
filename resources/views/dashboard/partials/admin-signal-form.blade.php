@@ -52,7 +52,7 @@
             </select>
         </label>
         <label>
-            <span class="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-gold-300">Jam Info Admin</span>
+            <span class="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-gold-300">Bar Waktu</span>
             <input type="time" name="info_time" value="{{ old('info_time') }}" class="min-h-11 w-full rounded-2xl border border-ink-700/70 bg-ink-800/60 px-4 py-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
             <span class="mt-2 block text-xs leading-relaxed text-ink-400">Opsional, hanya tampil di halaman admin.</span>
         </label>
