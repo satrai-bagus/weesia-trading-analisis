@@ -33,6 +33,7 @@ class TradeSignal extends Model
         'stop_loss',
         'position_side',
         'signal_term',
+        'info_time',
         'leverage',
         'coin_cost',
         'status',
@@ -100,6 +101,15 @@ class TradeSignal extends Model
     public function termLabel(): string
     {
         return $this->signal_term === self::TERM_LONG ? 'Long Term' : 'Short Term';
+    }
+
+    public function infoTimeLabel(): ?string
+    {
+        if (! $this->info_time) {
+            return null;
+        }
+
+        return substr((string) $this->info_time, 0, 5);
     }
 
     public function leverageValue(): int

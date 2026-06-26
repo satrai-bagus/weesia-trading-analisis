@@ -35,7 +35,12 @@
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <div class="font-display text-2xl leading-none text-ink-50 sm:text-3xl">{{ $signal->ticker }}</div>
-                            <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-300 sm:tracking-[0.22em]">Publish {{ $signal->created_at->format('d M H:i') }} oleh {{ optional($signal->createdBy)->name }}</div>
+                            <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-300 sm:tracking-[0.22em]">
+                                Publish {{ $signal->created_at->format('d M H:i') }} oleh {{ optional($signal->createdBy)->name }}
+                                @if ($signal->infoTimeLabel())
+                                    <span class="text-gold-300">/ Bar Waktu {{ $signal->infoTimeLabel() }}</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex w-fit rounded-full border border-gold-500/25 bg-gold-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-gold-200">{{ $signal->sideLabel() }} {{ $signal->leverageValue() }}x</span>
@@ -140,6 +145,11 @@
                                     <option value="{{ \App\Models\TradeSignal::TERM_SHORT }}" @selected($signal->signal_term === \App\Models\TradeSignal::TERM_SHORT)>Short Term</option>
                                     <option value="{{ \App\Models\TradeSignal::TERM_LONG }}" @selected($signal->signal_term === \App\Models\TradeSignal::TERM_LONG)>Long Term</option>
                                 </select>
+                            </label>
+                            <label class="block">
+                                <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">Jam Info Admin</span>
+                                <input type="time" name="info_time" value="{{ old('info_time', $signal->infoTimeLabel()) }}" class="mt-1 block w-full rounded-xl border border-ink-700/70 bg-ink-900 px-3 py-2 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                <span class="mt-1.5 block text-[11px] text-ink-400">Opsional, hanya terlihat admin.</span>
                             </label>
                             <label class="block">
                                 <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">Leverage</span>
