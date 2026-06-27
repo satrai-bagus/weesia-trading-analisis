@@ -53,7 +53,7 @@
         </label>
         <label>
             <span class="mb-2 block font-mono text-[10px] uppercase tracking-[0.24em] text-gold-300">Bar Waktu</span>
-            <input type="time" name="info_time" value="{{ old('info_time') }}" class="min-h-11 w-full rounded-2xl border border-ink-700/70 bg-ink-800/60 px-4 py-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+            <input type="datetime-local" name="info_at" value="{{ old('info_at') }}" class="min-h-11 w-full rounded-2xl border border-ink-700/70 bg-ink-800/60 px-4 py-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
             <span class="mt-2 block text-xs leading-relaxed text-ink-400">Opsional, hanya tampil di halaman admin.</span>
         </label>
         <x-form-field label="Take Profit 1" name="take_profit" placeholder="71420" />

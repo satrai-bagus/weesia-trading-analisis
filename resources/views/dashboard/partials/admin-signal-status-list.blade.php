@@ -37,8 +37,8 @@
                             <div class="font-display text-2xl leading-none text-ink-50 sm:text-3xl">{{ $signal->ticker }}</div>
                             <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-300 sm:tracking-[0.22em]">
                                 Publish {{ $signal->created_at->format('d M H:i') }} oleh {{ optional($signal->createdBy)->name }}
-                                @if ($signal->infoTimeLabel())
-                                    <span class="text-gold-300">/ Bar Waktu {{ $signal->infoTimeLabel() }}</span>
+                                @if ($signal->infoAtLabel())
+                                    <span class="text-gold-300">/ Bar Waktu {{ $signal->infoAtLabel() }}</span>
                                 @endif
                             </div>
                         </div>
@@ -147,8 +147,8 @@
                                 </select>
                             </label>
                             <label class="block">
-                                <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">Jam Info Admin</span>
-                                <input type="time" name="info_time" value="{{ old('info_time', $signal->infoTimeLabel()) }}" class="mt-1 block w-full rounded-xl border border-ink-700/70 bg-ink-900 px-3 py-2 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">Bar Waktu</span>
+                                <input type="datetime-local" name="info_at" value="{{ old('info_at', $signal->infoAtInputValue()) }}" class="mt-1 block w-full rounded-xl border border-ink-700/70 bg-ink-900 px-3 py-2 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
                                 <span class="mt-1.5 block text-[11px] text-ink-400">Opsional, hanya terlihat admin.</span>
                             </label>
                             <label class="block">

@@ -33,7 +33,7 @@ class TradeSignal extends Model
         'stop_loss',
         'position_side',
         'signal_term',
-        'info_time',
+        'info_at',
         'leverage',
         'coin_cost',
         'status',
@@ -50,6 +50,7 @@ class TradeSignal extends Model
             'entry_price' => 'float',
             'leverage' => 'integer',
             'coin_cost' => 'integer',
+            'info_at' => 'datetime',
             'auto_hit_at' => 'datetime',
         ];
     }
@@ -103,13 +104,22 @@ class TradeSignal extends Model
         return $this->signal_term === self::TERM_LONG ? 'Long Term' : 'Short Term';
     }
 
-    public function infoTimeLabel(): ?string
+    public function infoAtLabel(): ?string
     {
-        if (! $this->info_time) {
+        if (! $this->info_at) {
             return null;
         }
 
-        return substr((string) $this->info_time, 0, 5);
+        return $this->info_at->format('d M Y H:i');
+    }
+
+    public function infoAtInputValue(): ?string
+    {
+        if (! $this->info_at) {
+            return null;
+        }
+
+        return $this->info_at->format('Y-m-d\TH:i');
     }
 
     public function leverageValue(): int
