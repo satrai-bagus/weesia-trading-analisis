@@ -8,28 +8,37 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AuthController extends Controller
 {
     private const SIGNUP_BONUS_TOKENS = 5;
 
-    public function showLogin(): View|RedirectResponse
+    public function showLogin(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route(Auth::user()->role === 'admin' ? 'admin.dashboard' : 'user.dashboard');
         }
 
-        return view('auth.login');
+        $this->rememberRedirectTarget($request);
+
+        return view('auth.login', [
+            'checkoutIntent' => $this->hasCheckoutIntent($request),
+        ]);
     }
 
-    public function showRegister(): View|RedirectResponse
+    public function showRegister(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route(Auth::user()->role === 'admin' ? 'admin.dashboard' : 'user.dashboard');
         }
 
-        return view('auth.register');
+        $this->rememberRedirectTarget($request);
+
+        return view('auth.register', [
+            'checkoutIntent' => $this->hasCheckoutIntent($request),
+        ]);
     }
 
     public function login(Request $request): RedirectResponse
@@ -84,7 +93,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('user.dashboard')
+            ->intended(route('user.dashboard'))
             ->with('registration_success', true);
     }
 
@@ -96,5 +105,32 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    /**
+     * Store a safe internal "?redirect=" path as the intended URL so that
+     * login / register / Google all land the user back where they wanted
+     * (e.g. /buy) instead of the generic dashboard.
+     */
+    private function rememberRedirectTarget(Request $request): void
+    {
+        $target = $request->query('redirect');
+
+        if (is_string($target)
+            && Str::startsWith($target, '/')
+            && ! Str::startsWith($target, ['//', '/\\'])) {
+            $request->session()->put('url.intended', $target);
+        }
+    }
+
+    /**
+     * Whether the visitor arrived here on the way to checkout, so the auth
+     * pages can show a "lanjut ke checkout" message instead of a bare wall.
+     */
+    private function hasCheckoutIntent(Request $request): bool
+    {
+        $intended = (string) ($request->query('redirect') ?: $request->session()->get('url.intended', ''));
+
+        return Str::contains($intended, '/buy');
     }
 }

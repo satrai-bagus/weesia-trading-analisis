@@ -116,7 +116,7 @@
                 </section>
 
                 <div class="flex justify-end">
-                    <button class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-7 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_18px_60px_-15px_rgba(212,167,44,0.7)] transition-all hover:shadow-[0_24px_80px_-15px_rgba(212,167,44,0.9)]">
+                    <button class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-7 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_18px_60px_-15px_rgba(23,209,131,0.7)] transition-all hover:shadow-[0_24px_80px_-15px_rgba(23,209,131,0.9)]">
                         <x-icon name="check-circle" class="h-4 w-4" />
                         Simpan Settings
                     </button>

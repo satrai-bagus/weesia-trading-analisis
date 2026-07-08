@@ -13,7 +13,7 @@
                     </div>
                     <h1 class="mt-3 font-display text-3xl text-ink-50 sm:text-4xl">Pesanan Saya</h1>
                 </div>
-                <a href="{{ route('checkout') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition-all hover:shadow-[0_14px_44px_-16px_rgba(212,167,44,1)]">
+                <a href="{{ route('checkout') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition-all hover:shadow-[0_14px_44px_-16px_rgba(23,209,131,1)]">
                     <x-icon name="wallet" class="h-4 w-4" />
                     Beli Lagi
                 </a>

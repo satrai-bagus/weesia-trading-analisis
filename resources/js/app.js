@@ -1,3 +1,5 @@
+import { setupLandingMotion } from './landing-motion';
+
 const ready = (callback) => {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', callback, { once: true });
@@ -18,6 +20,7 @@ ready(() => {
     setupSignalCarousels();
     setupSignalFilters();
     setupReveal();
+    setupLandingMotion();
     setupHeroCanvas();
     setupCounters();
     setupTp2Field();
@@ -175,28 +178,6 @@ function setupLandingFeaturedSignal() {
             }
         };
 
-        const setProfitTone = (value) => {
-            const element = card.querySelector('[data-featured-profit]');
-            if (!element || !value) {
-                return;
-            }
-
-            element.textContent = value;
-            element.classList.remove('text-emerald-300', 'text-rose-300', 'text-gold-200');
-
-            if (String(value).startsWith('-')) {
-                element.classList.add('text-rose-300');
-                return;
-            }
-
-            if (value === 'LIVE') {
-                element.classList.add('text-gold-200');
-                return;
-            }
-
-            element.classList.add('text-emerald-300');
-        };
-
         const setSideTone = (side) => {
             const element = card.querySelector('[data-featured-side]');
             if (!element) {
@@ -225,13 +206,24 @@ function setupLandingFeaturedSignal() {
             setText('[data-featured-entry]', analysis.entry);
             setText('[data-featured-tp1]', analysis.tp1);
             setText('[data-featured-sl]', analysis.sl);
-            setText('[data-featured-confidence]', analysis.confidence);
+            setText('[data-featured-rr]', analysis.rr);
             setSideTone(analysis.side);
-            setProfitTone(analysis.profit);
 
-            const confidenceBar = card.querySelector('[data-featured-confidence-bar]');
-            if (confidenceBar && analysis.confidence_width) {
-                confidenceBar.style.width = analysis.confidence_width;
+            if (typeof analysis.is_live === 'boolean') {
+                const liveDot = card.querySelector('[data-featured-live-dot]');
+                const liveLabel = card.querySelector('[data-featured-live-label]');
+
+                if (liveDot) {
+                    liveDot.className = analysis.is_live
+                        ? 'animate-pulse-soft h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_2px_rgba(47,199,124,0.6)]'
+                        : 'h-2.5 w-2.5 rounded-full bg-gold-400 shadow-[0_0_12px_2px_rgba(23,209,131,0.5)]';
+                }
+
+                if (liveLabel) {
+                    setText('[data-featured-live-label]', analysis.live_label);
+                    liveLabel.classList.toggle('text-emerald-300', analysis.is_live);
+                    liveLabel.classList.toggle('text-gold-200', !analysis.is_live);
+                }
             }
         };
 
@@ -1422,7 +1414,7 @@ function createLiveSignalChart(container, config) {
 
         const halo = context.createRadialGradient(state.width * 0.8, state.height * 0.05, 0, state.width * 0.8, state.height * 0.05, state.width * 0.55);
         halo.addColorStop(0, 'rgba(47, 199, 124, 0.13)');
-        halo.addColorStop(0.42, 'rgba(212, 167, 44, 0.08)');
+        halo.addColorStop(0.42, 'rgba(23, 209, 131, 0.08)');
         halo.addColorStop(1, 'rgba(5, 5, 5, 0)');
         context.fillStyle = halo;
         context.fillRect(0, 0, state.width, state.height);
@@ -1442,13 +1434,13 @@ function createLiveSignalChart(container, config) {
                 weight: 700,
             });
             drawText(`${config.side.toUpperCase()} ${config.leverage}X  /  ${liveSignalTimeframe} LIVE PULSE  /  ${config.ticker}`, pad, fullscreen ? 122 : 100, {
-                color: '#d4a72c',
+                color: '#17d183',
                 size: 11,
                 letterSpacing: 4,
             });
         } else {
             drawText(`${config.side.toUpperCase()} ${config.leverage}X  /  ${liveSignalTimeframe}`, pad, 50, {
-                color: '#d4a72c',
+                color: '#17d183',
                 size: 10,
                 letterSpacing: 3,
             });
@@ -1503,7 +1495,7 @@ function createLiveSignalChart(container, config) {
         for (let i = 1; i < 5; i += 1) {
             const y = chartY + (chartH / 5) * i;
             context.setLineDash([6, 10]);
-            context.strokeStyle = 'rgba(212, 167, 44, 0.08)';
+            context.strokeStyle = 'rgba(23, 209, 131, 0.08)';
             context.beginPath();
             context.moveTo(chartX, y);
             context.lineTo(chartRight, y);
@@ -1529,9 +1521,9 @@ function createLiveSignalChart(container, config) {
             context.lineTo(chartX, chartBottom);
             context.closePath();
             const fill = context.createLinearGradient(0, chartY, 0, chartBottom);
-            fill.addColorStop(0, 'rgba(212, 167, 44, 0.34)');
-            fill.addColorStop(0.62, 'rgba(212, 167, 44, 0.09)');
-            fill.addColorStop(1, 'rgba(212, 167, 44, 0)');
+            fill.addColorStop(0, 'rgba(23, 209, 131, 0.34)');
+            fill.addColorStop(0.62, 'rgba(23, 209, 131, 0.09)');
+            fill.addColorStop(1, 'rgba(23, 209, 131, 0)');
             context.fillStyle = fill;
             context.fill();
 
@@ -1543,19 +1535,19 @@ function createLiveSignalChart(container, config) {
                 }
                 context.lineTo(x, y);
             });
-            context.strokeStyle = 'rgba(58, 51, 20, 0.45)';
+            context.strokeStyle = 'rgba(6, 48, 32, 0.45)';
             context.lineWidth = compact ? 5 : 8;
             context.lineJoin = 'round';
             context.lineCap = 'round';
             context.stroke();
 
             const line = context.createLinearGradient(chartX, 0, chartRight, 0);
-            line.addColorStop(0, '#d7c887');
-            line.addColorStop(0.48, '#fff5bd');
-            line.addColorStop(1, '#d4a72c');
+            line.addColorStop(0, '#8df0c2');
+            line.addColorStop(0.48, '#eafff5');
+            line.addColorStop(1, '#17d183');
             context.strokeStyle = line;
             context.lineWidth = compact ? 2.2 : 3.6;
-            context.shadowColor = 'rgba(251, 238, 182, 0.5)';
+            context.shadowColor = 'rgba(201, 247, 224, 0.5)';
             context.shadowBlur = compact ? 8 : 14;
             context.stroke();
             context.shadowBlur = 0;
@@ -1566,7 +1558,7 @@ function createLiveSignalChart(container, config) {
             drawLevel('TP2', config.tp2, tp2Y, '#6fe0a8', chartX, chartRight, compact);
         }
         if (config.showEntry) {
-            drawLevel('ENTRY', config.entry, entryY, '#d4a72c', chartX, chartRight, compact, false);
+            drawLevel('ENTRY', config.entry, entryY, '#17d183', chartX, chartRight, compact, false);
         }
         drawLevel('SL', config.sl, slY, '#fda4af', chartX, chartRight, compact);
         const liveLabel = config.frozen
@@ -1574,7 +1566,7 @@ function createLiveSignalChart(container, config) {
             : 'LIVE';
         const liveColor = config.frozen
             ? (config.closeLabel && config.closeLabel.toLowerCase().includes('sl') ? '#fda4af' : '#6fe0a8')
-            : (state.price >= config.entry ? '#fbeeb6' : '#fda4af');
+            : (state.price >= config.entry ? '#c9f7e0' : '#fda4af');
         drawLevel(liveLabel, state.price, liveY, liveColor, chartX, chartRight, compact, false);
 
         context.beginPath();
@@ -1596,7 +1588,7 @@ function createLiveSignalChart(container, config) {
         const bottomLabel = config.showEntry ? 'ENTRY' : (config.frozen ? 'CLOSED' : 'LIVE');
         drawMetric(pad, bottomY, metricW, metricH, bottomLabel, money(config.showEntry ? config.entry : state.price), '#f5f3ee', compact ? '' : config.ticker);
         drawMetric(pad + metricW + gap, bottomY, metricW, metricH, 'TP1', money(config.tp1), '#6fe0a8', compact ? '' : percent(config.tp1));
-        drawMetric(pad + (metricW + gap) * 2, bottomY, metricW, metricH, 'SL', money(config.sl), '#f5df76', compact ? '' : percent(config.sl));
+        drawMetric(pad + (metricW + gap) * 2, bottomY, metricW, metricH, 'SL', money(config.sl), '#fda4af', compact ? '' : percent(config.sl));
 
         if (!compact) {
             drawText(config.showEntry
@@ -1607,7 +1599,7 @@ function createLiveSignalChart(container, config) {
                 letterSpacing: 2,
             });
             drawText('WEESIA', state.width - pad, state.height - 28, {
-                color: '#d4a72c',
+                color: '#17d183',
                 size: 10,
                 align: 'right',
                 letterSpacing: 4,
@@ -1842,7 +1834,7 @@ function setupHeroCanvas() {
 
         staticContext.clearRect(0, 0, width, height);
         staticContext.save();
-        staticContext.strokeStyle = 'rgba(212, 167, 44, 0.05)';
+        staticContext.strokeStyle = 'rgba(23, 209, 131, 0.05)';
         staticContext.lineWidth = 1;
 
         for (let x = 0; x < width; x += 80) {
@@ -1889,13 +1881,13 @@ function setupHeroCanvas() {
         }
 
         areaGradient = context.createLinearGradient(0, padY, 0, padY + innerH);
-        areaGradient.addColorStop(0, 'rgba(212, 167, 44, 0.18)');
-        areaGradient.addColorStop(1, 'rgba(212, 167, 44, 0)');
+        areaGradient.addColorStop(0, 'rgba(23, 209, 131, 0.18)');
+        areaGradient.addColorStop(1, 'rgba(23, 209, 131, 0)');
 
         strokeGradient = context.createLinearGradient(0, 0, width, 0);
-        strokeGradient.addColorStop(0, 'rgba(212, 167, 44, 0.2)');
-        strokeGradient.addColorStop(0.5, 'rgba(251, 238, 182, 0.85)');
-        strokeGradient.addColorStop(1, 'rgba(212, 167, 44, 0.2)');
+        strokeGradient.addColorStop(0, 'rgba(23, 209, 131, 0.2)');
+        strokeGradient.addColorStop(0.5, 'rgba(201, 247, 224, 0.85)');
+        strokeGradient.addColorStop(1, 'rgba(23, 209, 131, 0.2)');
 
         drawStaticLayer();
         seedParticles();
@@ -1920,7 +1912,7 @@ function setupHeroCanvas() {
 
             context.beginPath();
             context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
-            context.fillStyle = `rgba(212, 167, 44, ${particle.a})`;
+            context.fillStyle = `rgba(23, 209, 131, ${particle.a})`;
             context.fill();
         }
     };
@@ -1954,7 +1946,7 @@ function setupHeroCanvas() {
         context.lineTo(padX + innerW, padY + innerH);
         context.lineTo(padX, padY + innerH);
         context.closePath();
-        context.fillStyle = areaGradient || 'rgba(212, 167, 44, 0.12)';
+        context.fillStyle = areaGradient || 'rgba(23, 209, 131, 0.12)';
         context.fill();
 
         context.beginPath();
@@ -1969,9 +1961,9 @@ function setupHeroCanvas() {
             }
         }
 
-        context.strokeStyle = strokeGradient || 'rgba(251, 238, 182, 0.85)';
+        context.strokeStyle = strokeGradient || 'rgba(201, 247, 224, 0.85)';
         context.lineWidth = 1.6;
-        context.shadowColor = 'rgba(212, 167, 44, 0.6)';
+        context.shadowColor = 'rgba(23, 209, 131, 0.6)';
         context.shadowBlur = 10;
         context.stroke();
         context.shadowBlur = 0;

@@ -5,8 +5,8 @@
                 <x-icon name="shield-check" class="h-5 w-5" />
             </span>
             <div>
-                <h2 class="font-display text-2xl leading-none text-ink-50">Status Trading</h2>
-                <div class="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-300">Real-time</div>
+                <h2 class="font-display text-2xl leading-none text-ink-50">Signal Aktif</h2>
+                <div class="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-300">Real-time - {{ $signals->count() }} berjalan</div>
             </div>
         </div>
         @if ($signals->count() > 7)
@@ -208,8 +208,8 @@
             </article>
         @empty
             <div class="rounded-2xl border border-dashed border-gold-500/25 bg-ink-800/35 p-8 text-center">
-                <div class="font-display text-2xl text-ink-50">Belum ada signal trading.</div>
-                <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Upload foto analisa, ticker, TP, dan SL dari form admin.</p>
+                <div class="font-display text-2xl text-ink-50">Tidak ada signal aktif.</div>
+                <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Publish signal baru dari halaman <a href="{{ route('admin.signals') }}" class="text-gold-200 underline decoration-gold-500/50 underline-offset-4 hover:text-gold-100">Signal</a>. Signal yang sudah kena TP/SL otomatis pindah ke Arsip Signal di halaman Signal.</p>
             </div>
         @endforelse
     </div>

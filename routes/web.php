@@ -39,6 +39,10 @@ Route::get('/landing/featured-signal', [LandingController::class, 'featuredSigna
     ])
     ->name('landing.featured-signal');
 
+Route::view('/disclaimer', 'legal.disclaimer')->name('legal.disclaimer');
+Route::view('/privasi', 'legal.privacy')->name('legal.privacy');
+Route::view('/ketentuan', 'legal.terms')->name('legal.terms');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');

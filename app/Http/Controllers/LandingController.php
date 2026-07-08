@@ -33,7 +33,30 @@ class LandingController extends Controller
         return view('landing', [
             'landingTickers' => $this->fallbackTickers(),
             'featuredAnalysis' => $analysis,
+            'recordStats' => $this->recordStats(),
         ]);
+    }
+
+    private function recordStats(): ?array
+    {
+        if (! Schema::hasTable('trade_signals')) {
+            return null;
+        }
+
+        $total = TradeSignal::count();
+        $hitTp = TradeSignal::whereIn('status', [
+            TradeSignal::STATUS_HIT_TP,
+            TradeSignal::STATUS_HIT_TP2,
+        ])->count();
+        $hitSl = TradeSignal::where('status', TradeSignal::STATUS_HIT_SL)->count();
+
+        return [
+            'total' => $total,
+            'active' => TradeSignal::where('status', TradeSignal::STATUS_ACTIVE)->count(),
+            'hitTp' => $hitTp,
+            'hitSl' => $hitSl,
+            'closed' => $hitTp + $hitSl,
+        ];
     }
 
     public function marketTickers(Request $request, CryptoMarketData $marketData): JsonResponse
@@ -96,13 +119,7 @@ class LandingController extends Controller
         $signal = TradeSignal::find($signal->id) ?: $signal;
         $live = $priceMap[$signal->ticker] ?? null;
         $entry = $signal->entry_price ?: $live ?: (($signal->take_profit + $signal->stop_loss) / 2);
-        $target = match ($signal->status) {
-            TradeSignal::STATUS_HIT_TP2 => $signal->take_profit_2 ?: $signal->take_profit,
-            TradeSignal::STATUS_HIT_TP => $signal->take_profit,
-            default => $live ?: $signal->take_profit,
-        };
-        $profit = $target ? $signal->leveragedMoveTo((float) $target, $entry) : null;
-        $confidence = $this->confidenceFor($signal);
+        $isLive = $signal->status === TradeSignal::STATUS_ACTIVE;
 
         return [
             'id' => $signal->id,
@@ -110,7 +127,9 @@ class LandingController extends Controller
             'title' => $this->analysisTitle($signal),
             'status' => $signal->status,
             'status_label' => $signal->statusLabel(),
-            'status_meta' => $signal->status === TradeSignal::STATUS_ACTIVE ? 'Setup Aktif' : 'Arsip Gratis',
+            'status_meta' => $isLive ? 'Setup Aktif' : 'Arsip Riset',
+            'is_live' => $isLive,
+            'live_label' => $isLive ? 'Analisa Live' : 'Dari Arsip Riset',
             'side' => $signal->sideLabel(),
             'timeframe' => '4H',
             'entry' => $this->formatPrice((float) $entry),
@@ -118,11 +137,27 @@ class LandingController extends Controller
             'tp1' => $this->formatPrice((float) $signal->take_profit),
             'tp2' => $signal->take_profit_2 ? $this->formatPrice((float) $signal->take_profit_2) : null,
             'sl' => $this->formatPrice((float) $signal->stop_loss),
-            'profit' => $this->formatPercent($profit),
-            'confidence' => $confidence,
-            'confidence_width' => $confidence.'%',
-            'is_tp' => in_array($signal->status, [TradeSignal::STATUS_HIT_TP, TradeSignal::STATUS_HIT_TP2], true),
+            'rr' => $this->riskRewardFor($signal, (float) $signal->entry_price ?: (float) $entry),
         ];
+    }
+
+    private function riskRewardFor(TradeSignal $signal, float $entry): ?string
+    {
+        $reward = abs((float) $signal->take_profit - $entry);
+        $risk = abs($entry - (float) $signal->stop_loss);
+
+        if ($entry <= 0 || $risk <= 0 || $reward <= 0) {
+            return null;
+        }
+
+        $ratio = $reward / $risk;
+
+        // A ratio that would render as "1 : 0" is worse than showing nothing.
+        if ($ratio < 0.05) {
+            return null;
+        }
+
+        return '1 : '.rtrim(rtrim(number_format($ratio, 1, '.', ','), '0'), '.');
     }
 
     private function featuredSignalForToday(): ?TradeSignal
@@ -181,23 +216,6 @@ class LandingController extends Controller
             : 'Bullish Retracement - 0.618';
     }
 
-    private function confidenceFor(TradeSignal $signal): int
-    {
-        if ($signal->status === TradeSignal::STATUS_HIT_TP2) {
-            return 92;
-        }
-
-        if ($signal->status === TradeSignal::STATUS_HIT_TP) {
-            return 88;
-        }
-
-        if ($signal->status === TradeSignal::STATUS_HIT_SL) {
-            return 64;
-        }
-
-        return 82;
-    }
-
     private function fallbackTickers(): array
     {
         return collect(self::TICKERS)
@@ -232,14 +250,4 @@ class LandingController extends Controller
         return $prefix.rtrim(rtrim(number_format($change, 2, '.', ','), '0'), '.').'%';
     }
 
-    private function formatPercent(?float $value): string
-    {
-        if ($value === null) {
-            return 'LIVE';
-        }
-
-        $prefix = $value > 0 ? '+' : '';
-
-        return $prefix.rtrim(rtrim(number_format($value, 2, '.', ','), '0'), '.').'%';
-    }
 }

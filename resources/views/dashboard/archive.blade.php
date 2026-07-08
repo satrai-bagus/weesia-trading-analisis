@@ -24,7 +24,7 @@
                 <svg class="h-full w-full" preserveAspectRatio="none">
                     <defs>
                         <pattern id="archive-grid" width="42" height="42" patternUnits="userSpaceOnUse">
-                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#d4a72c" stroke-width="0.7" />
+                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#17d183" stroke-width="0.7" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#archive-grid)" />
@@ -44,7 +44,7 @@
                             <span class="h-px w-10 bg-gold-500/60"></span>
                             <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Arsip Gratis</span>
                         </div>
-                        <h1 class="mt-5 max-w-3xl font-display text-4xl leading-[1.05] text-ink-50 sm:text-6xl">Riwayat Signal.</h1>
+                        <h1 class="mt-5 max-w-3xl font-display text-4xl leading-[1.05] text-ink-50 sm:text-6xl">Riwayat Analisa.</h1>
                         <p class="mt-5 max-w-2xl text-base leading-relaxed text-ink-200">Semua analisa yang sudah selesai berjalan - kena Take Profit atau Stop Loss - terbuka gratis sebagai catatan publik. Chart-nya berhenti di titik akhir sebagai bukti hasil.</p>
                     </div>
 
@@ -73,8 +73,8 @@
                         <x-icon name="database" class="h-7 w-7" />
                     </div>
                     <h2 class="mt-6 font-display text-3xl text-ink-50">Arsip masih kosong.</h2>
-                    <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Setiap signal yang sudah kena Take Profit atau Stop Loss akan otomatis masuk ke sini sebagai riwayat publik.</p>
-                    <a href="{{ route('user.dashboard') }}" class="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)]">
+                    <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Setiap analisa yang sudah kena Take Profit atau Stop Loss akan otomatis masuk ke sini sebagai riwayat publik.</p>
+                    <a href="{{ route('user.dashboard') }}" class="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                         <x-icon name="target" class="h-4 w-4" />
                         Lihat Analisa Aktif
                     </a>
@@ -186,11 +186,11 @@
 
                                     <p class="mt-4 text-sm leading-relaxed text-ink-300">
                                         @if ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL)
-                                            Signal kena Stop Loss. Catatan ini berguna untuk evaluasi risk plan & timing entry.
+                                            Analisa ini kena Stop Loss. Catatan ini berguna untuk evaluasi risk plan & timing entry.
                                         @elseif ($signal->status === \App\Models\TradeSignal::STATUS_HIT_TP2)
-                                            Signal kena Take Profit 2. Strategi short term/long term berjalan sesuai rencana.
+                                            Analisa ini kena Take Profit 2. Skenario short term/long term berjalan sesuai rencana.
                                         @else
-                                            Signal kena Take Profit 1. Konfirmasi target awal tercapai.
+                                            Analisa ini kena Take Profit 1. Harga menyentuh target awal.
                                         @endif
                                     </p>
                                 </div>

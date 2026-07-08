@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    // Public contact channel shown in the landing footer and legal pages.
+    'contact_email' => env('APP_CONTACT_EMAIL', 'timsupersentra@gmail.com'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

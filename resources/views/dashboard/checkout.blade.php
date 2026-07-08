@@ -32,7 +32,7 @@
 
             <div class="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
                 @foreach ($subscriptions as $key => $sub)
-                    <article class="reveal relative overflow-hidden rounded-3xl border border-gold-500/40 bg-gradient-to-br from-ink-800/90 via-ink-900 to-ink-900 p-7 shadow-[0_30px_80px_-30px_rgba(212,167,44,0.4)] sm:p-9">
+                    <article class="reveal relative overflow-hidden rounded-3xl border border-gold-500/40 bg-gradient-to-br from-ink-800/90 via-ink-900 to-ink-900 p-7 shadow-[0_30px_80px_-30px_rgba(23,209,131,0.4)] sm:p-9">
                         <div class="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gold-500/20 blur-3xl"></div>
                         <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-400 to-transparent"></div>
                         <div class="relative flex items-center justify-between">
@@ -40,7 +40,7 @@
                                 <x-icon name="shield-check" class="h-3.5 w-3.5 text-gold-200" />
                                 <span class="font-mono text-[10px] uppercase tracking-[0.25em] text-gold-200">Subscriber</span>
                             </div>
-                            <span class="rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-900 shadow-[0_8px_24px_-8px_rgba(212,167,44,0.8)]">Most Value</span>
+                            <span class="rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-900 shadow-[0_8px_24px_-8px_rgba(23,209,131,0.8)]">Most Value</span>
                         </div>
                         <h3 class="relative mt-7 font-display text-3xl text-ink-50 sm:text-4xl">{{ $sub['label'] }}</h3>
                         <p class="relative mt-3 text-sm leading-relaxed text-ink-200">Akses semua analisa aktif tanpa batas selama {{ $sub['months'] }} bulan.</p>
@@ -51,7 +51,7 @@
                         </div>
 
                         <ul class="relative mt-7 space-y-2.5 text-sm text-ink-100">
-                            @foreach (['Buka semua analisa aktif tanpa batas', 'Alert WhatsApp realtime', 'Live profit estimator', 'Arsip TP/SL terbuka selamanya'] as $perk)
+                            @foreach (['Buka semua analisa aktif tanpa batas', 'Alert WhatsApp realtime', 'Kalkulator P/L live', 'Arsip TP/SL terbuka selamanya'] as $perk)
                                 <li class="flex items-start gap-3">
                                     <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gold-500/30 bg-gold-500/10">
                                         <x-icon name="check-circle" class="h-3 w-3 text-gold-200" />
@@ -68,7 +68,7 @@
                                 <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">Nomor WhatsApp (untuk notif)</span>
                                 <input name="whatsapp_number" type="tel" placeholder="08xxxxxxxxxx" class="mt-2 block w-full rounded-2xl border border-ink-700/70 bg-ink-800/60 px-4 py-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
                             </label>
-                            <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_18px_60px_-15px_rgba(212,167,44,0.7)] transition-all hover:shadow-[0_24px_80px_-15px_rgba(212,167,44,0.9)]">
+                            <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_18px_60px_-15px_rgba(23,209,131,0.7)] transition-all hover:shadow-[0_24px_80px_-15px_rgba(23,209,131,0.9)]">
                                 Buat Pesanan
                                 <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
                             </button>
@@ -86,7 +86,7 @@
                         <span class="rounded-full border border-ink-600/70 bg-ink-800/60 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-200">Pay per analisa</span>
                     </div>
                     <h3 class="relative mt-7 font-display text-3xl text-ink-50 sm:text-4xl">Beli Token</h3>
-                    <p class="relative mt-3 text-sm leading-relaxed text-ink-200">1 token = Rp 1.000. Pakai untuk buka analisa sesuai tier ROI signal.</p>
+                    <p class="relative mt-3 text-sm leading-relaxed text-ink-200">1 token = Rp 1.000. Pakai untuk buka analisa sesuai tier ROI-nya.</p>
 
                     <div class="relative mt-6 grid grid-cols-2 gap-2.5 text-[11px] text-ink-300">
                         @foreach ($tierTokens as $i => $tierToken)
@@ -124,6 +124,8 @@
                     </form>
                 </article>
             </div>
+
+            <p class="reveal mt-6 text-xs leading-relaxed text-ink-400">Pembelian token dan langganan adalah akses ke konten riset &amp; edukasi - bukan produk investasi dan bukan jaminan hasil. Baca <a href="{{ route('legal.disclaimer') }}" class="underline text-gold-300 transition-colors hover:text-gold-100">disclaimer</a>.</p>
 
             @if ($orders->isNotEmpty())
                 <div class="reveal mt-12">

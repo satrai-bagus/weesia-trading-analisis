@@ -72,7 +72,7 @@
         <div id="tp2-field" class="{{ old('has_take_profit_2') ? '' : 'hidden' }}">
             <x-form-field label="Take Profit 2" name="take_profit_2" placeholder="73200" :required="false" />
         </div>
-        <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)] lg:col-span-2">
+        <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)] lg:col-span-2">
             <x-icon name="send" class="h-4 w-4" />
             Publish ke User Dashboard
         </button>

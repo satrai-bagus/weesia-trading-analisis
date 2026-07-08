@@ -4,7 +4,7 @@
             <svg class="h-full w-full" preserveAspectRatio="none">
                 <defs>
                     <pattern id="login-grid" width="52" height="52" patternUnits="userSpaceOnUse">
-                        <path d="M 52 0 L 0 0 0 52" fill="none" stroke="#d4a72c" stroke-width="0.8" />
+                        <path d="M 52 0 L 0 0 0 52" fill="none" stroke="#17d183" stroke-width="0.8" />
                     </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#login-grid)" />
@@ -18,7 +18,7 @@
                     <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Member Access</span>
                 </div>
                 <h1 class="mt-6 max-w-3xl font-display text-5xl leading-[1.05] text-ink-50 sm:text-6xl">
-                    Akses analisa crypto <span class="text-gold-gradient italic">FibPath.</span>
+                    Akses analisa crypto <span class="text-gold-gradient font-accent italic">FibPath.</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-base leading-relaxed text-ink-200">
                     Daftar atau masuk pakai akun Google &mdash; tanpa password ribet. Akun baru otomatis dapat <span class="text-gold-200">5 token gratis</span> untuk coba analisa FibPath pertama kamu.
@@ -32,13 +32,20 @@
                     <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-300">Weesia Member Area</div>
                 </div>
 
+                @if (! empty($checkoutIntent))
+                    <div class="mb-5 flex items-start gap-3 rounded-2xl border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-sm text-gold-100">
+                        <x-icon name="wallet" class="mt-0.5 h-4 w-4 shrink-0 text-gold-200" />
+                        <span>Masuk dulu untuk lanjut ke checkout. Akun baru langsung dapat <span class="font-semibold text-gold-50">5 token gratis</span> untuk buka analisa.</span>
+                    </div>
+                @endif
+
                 @if (isset($errors) && $errors->any())
                     <div class="mb-5 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
                         {{ $errors->first() }}
                     </div>
                 @endif
 
-                <a href="{{ route('auth.google.redirect') }}" class="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-ink-600/70 bg-ink-50 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)] transition-all hover:border-gold-500/40 hover:shadow-[0_22px_60px_-20px_rgba(212,167,44,0.45)]">
+                <a href="{{ route('auth.google.redirect') }}" class="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-ink-600/70 bg-ink-50 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)] transition-all hover:border-gold-500/40 hover:shadow-[0_22px_60px_-20px_rgba(23,209,131,0.45)]">
                     <svg class="h-5 w-5" viewBox="0 0 48 48" aria-hidden="true">
                         <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
                         <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4c-7.6 0-14.2 4.3-17.7 10.7z"/>
@@ -72,12 +79,12 @@
                         </span>
                     </label>
 
-                    <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)]">
+                    <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                         Masuk ke Dashboard
                         <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </button>
 
-                    <a href="{{ route('register') }}" class="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-gold-500/35 bg-gold-500/10 px-6 py-3.5 text-sm font-semibold text-gold-100 transition-all hover:border-gold-400/70 hover:bg-gold-500/15 hover:text-gold-50">
+                    <a href="{{ route('register', array_filter(['redirect' => request('redirect')])) }}" class="group inline-flex w-full items-center justify-center gap-2 rounded-full border border-gold-500/35 bg-gold-500/10 px-6 py-3.5 text-sm font-semibold text-gold-100 transition-all hover:border-gold-400/70 hover:bg-gold-500/15 hover:text-gold-50">
                         <x-icon name="user-plus" class="h-4 w-4" />
                         Daftar Akun Baru
                         <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />

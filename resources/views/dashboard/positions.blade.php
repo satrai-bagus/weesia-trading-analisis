@@ -34,7 +34,7 @@
                 <svg class="h-full w-full" preserveAspectRatio="none">
                     <defs>
                         <pattern id="positions-grid" width="42" height="42" patternUnits="userSpaceOnUse">
-                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#d4a72c" stroke-width="0.7" />
+                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#17d183" stroke-width="0.7" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#positions-grid)" />
@@ -99,7 +99,7 @@
                     </div>
                     <h2 class="mt-6 font-display text-3xl text-ink-50">Meja kamu masih kosong.</h2>
                     <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Pasang analisa sebagai <span class="text-emerald-200">Posisi</span> atau <span class="text-gold-200">Pantauan</span> dari halaman analisa, dan semua chart-nya akan tampil di sini.</p>
-                    <a href="{{ route('user.dashboard') }}#signals" class="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)]">
+                    <a href="{{ route('user.dashboard') }}#signals" class="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                         <x-icon name="target" class="h-4 w-4" />
                         Pilih Analisa
                     </a>
@@ -169,10 +169,10 @@
                                 @if ($unlocked)
                                     <x-live-signal-chart :signal="$signal" :entry="$entryFor($signal)" :current="$liveFor($signal)" />
                                 @else
-                                    <div class="relative flex min-h-[340px] flex-col items-center justify-center overflow-hidden border-b border-ink-700/60 bg-[radial-gradient(circle_at_50%_30%,rgba(212,167,44,0.12),transparent_60%)] lg:border-b-0 lg:border-r">
+                                    <div class="relative flex min-h-[340px] flex-col items-center justify-center overflow-hidden border-b border-ink-700/60 bg-[radial-gradient(circle_at_50%_30%,rgba(23,209,131,0.12),transparent_60%)] lg:border-b-0 lg:border-r">
                                         <div class="pointer-events-none absolute inset-0 opacity-30">
                                             <svg class="h-full w-full" viewBox="0 0 360 200" preserveAspectRatio="none">
-                                                <path d="M0,140 L40,120 L80,128 L120,90 L160,104 L200,68 L240,80 L280,46 L320,56 L360,40" fill="none" stroke="rgba(212,167,44,0.5)" stroke-width="1.5" stroke-dasharray="3 6" />
+                                                <path d="M0,140 L40,120 L80,128 L120,90 L160,104 L200,68 L240,80 L280,46 L320,56 L360,40" fill="none" stroke="rgba(23,209,131,0.5)" stroke-width="1.5" stroke-dasharray="3 6" />
                                             </svg>
                                         </div>
                                         <span class="relative inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-gold-500/30 bg-gold-500/10 text-gold-200">
@@ -228,7 +228,7 @@
                                         </div>
 
                                         <p class="mt-4 text-sm leading-relaxed text-ink-300">
-                                            {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Signal masih berjalan. Estimasi ROI memakai harga live realtime sebagai entry.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss. Evaluasi risk sebelum entry berikutnya.' : 'Harga sudah mencapai target profit.') }}
+                                            {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Analisa masih berjalan. Estimasi ROI memakai harga live realtime sebagai entry.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss. Evaluasi risk sebelum entry berikutnya.' : 'Harga sudah menyentuh target.') }}
                                         </p>
 
                                         <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
@@ -310,19 +310,26 @@
                                                     <div class="text-sm text-ink-50"><span class="font-display text-2xl text-gold-200">{{ $cost }}</span> koin untuk buka ulang</div>
                                                 </div>
                                             </div>
-                                            <button type="button"
-                                                    data-unlock-trigger
-                                                    data-signal-id="{{ $signal->id }}"
-                                                    data-signal-ticker="{{ $signal->ticker }}"
-                                                    data-signal-side="{{ $signal->sideLabel() }}"
-                                                    data-signal-leverage="{{ $signal->leverageValue() }}"
-                                                    data-signal-cost="{{ $cost }}"
-                                                    data-signal-action="{{ route('signals.unlock', $signal) }}"
-                                                    @disabled($coinBalance < $cost)
-                                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:bg-gold-300 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400 sm:w-auto">
-                                                <x-icon name="lock" class="h-4 w-4" />
-                                                {{ $coinBalance < $cost ? 'Saldo kurang' : 'Buka Lagi' }}
-                                            </button>
+                                            @if ($coinBalance < $cost)
+                                                <a href="{{ route('checkout') }}"
+                                                   class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold-500/40 bg-gold-500/10 px-5 py-2.5 text-sm font-semibold text-gold-100 transition-colors hover:border-gold-400/70 hover:bg-gold-500/20 sm:w-auto">
+                                                    <x-icon name="wallet" class="h-4 w-4" />
+                                                    Kurang {{ $cost - $coinBalance }} token &middot; Top Up
+                                                </a>
+                                            @else
+                                                <button type="button"
+                                                        data-unlock-trigger
+                                                        data-signal-id="{{ $signal->id }}"
+                                                        data-signal-ticker="{{ $signal->ticker }}"
+                                                        data-signal-side="{{ $signal->sideLabel() }}"
+                                                        data-signal-leverage="{{ $signal->leverageValue() }}"
+                                                        data-signal-cost="{{ $cost }}"
+                                                        data-signal-action="{{ route('signals.unlock', $signal) }}"
+                                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:bg-gold-300 sm:w-auto">
+                                                    <x-icon name="lock" class="h-4 w-4" />
+                                                    Buka Lagi
+                                                </button>
+                                            @endif
 
                                             <form method="POST" action="{{ route('signals.positions.destroy', $signal) }}">
                                                 @csrf

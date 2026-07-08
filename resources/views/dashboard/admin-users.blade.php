@@ -35,7 +35,7 @@
                 <svg class="h-full w-full" preserveAspectRatio="none">
                     <defs>
                         <pattern id="admin-users-grid" width="42" height="42" patternUnits="userSpaceOnUse">
-                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#d4a72c" stroke-width="0.7" />
+                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#17d183" stroke-width="0.7" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#admin-users-grid)" />
@@ -75,7 +75,7 @@
         <section class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
 
             @if ($topUsers->isNotEmpty())
-                <div class="reveal rounded-2xl border border-gold-500/25 bg-[linear-gradient(120deg,rgba(212,167,44,0.07),rgba(18,18,16,0.85)_60%)] p-4 backdrop-blur-xl sm:p-5">
+                <div class="reveal rounded-2xl border border-gold-500/25 bg-[linear-gradient(120deg,rgba(23,209,131,0.07),rgba(18,18,16,0.85)_60%)] p-4 backdrop-blur-xl sm:p-5">
                     <div class="mb-5 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gold-500/30 bg-gold-500/10 text-gold-200">
@@ -162,7 +162,7 @@
                             <button type="button" data-carousel-next aria-label="User berikutnya" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-500/25 bg-gold-500/10 text-gold-100 transition-all hover:border-gold-400/70 disabled:cursor-not-allowed disabled:opacity-35">
                                 <x-icon name="arrow-right" class="h-4 w-4" />
                             </button>
-                            <button type="button" data-modal-open="add-user" class="inline-flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:bg-gold-300">
+                            <button type="button" data-modal-open="add-user" class="inline-flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:bg-gold-300">
                                 <x-icon name="user" class="h-4 w-4" />
                                 <span>Tambah</span>
                             </button>

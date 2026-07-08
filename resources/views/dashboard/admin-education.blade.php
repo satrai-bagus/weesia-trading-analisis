@@ -32,7 +32,7 @@
                     <h1 class="mt-3 font-display text-3xl text-ink-50 sm:text-4xl">Modul Edukasi</h1>
                     <p class="mt-2 max-w-xl text-sm leading-relaxed text-ink-300">Kelola tutorial step-by-step untuk chart, exchange, dan basic trading.</p>
                 </div>
-                <a href="#new-education" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-900 shadow-[0_10px_30px_-10px_rgba(212,167,44,0.7)] transition-all hover:shadow-[0_14px_40px_-10px_rgba(212,167,44,0.95)]">
+                <a href="#new-education" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-900 shadow-[0_10px_30px_-10px_rgba(23,209,131,0.7)] transition-all hover:shadow-[0_14px_40px_-10px_rgba(23,209,131,0.95)]">
                     <x-icon name="plus" class="h-3.5 w-3.5" />
                     Buat Edukasi
                 </a>
@@ -189,7 +189,7 @@
                     </div>
 
                     <div class="flex items-center justify-end">
-                        <button class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)]">
+                        <button class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                             <x-icon name="check-circle" class="h-4 w-4" />
                             Simpan Edukasi
                         </button>

@@ -4,7 +4,7 @@
             <svg class="h-full w-full" preserveAspectRatio="none">
                 <defs>
                     <pattern id="register-grid" width="52" height="52" patternUnits="userSpaceOnUse">
-                        <path d="M 52 0 L 0 0 0 52" fill="none" stroke="#d4a72c" stroke-width="0.8" />
+                        <path d="M 52 0 L 0 0 0 52" fill="none" stroke="#17d183" stroke-width="0.8" />
                     </pattern>
                 </defs>
                 <rect width="100%" height="100%" fill="url(#register-grid)" />
@@ -18,10 +18,10 @@
                     <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Create Account</span>
                 </div>
                 <h1 class="mt-6 max-w-3xl font-display text-5xl leading-[1.05] text-ink-50 sm:text-6xl">
-                    Mulai akses analisa <span class="text-gold-gradient italic">Weesia.</span>
+                    Mulai akses analisa <span class="text-gold-gradient font-accent italic">Weesia.</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-base leading-relaxed text-ink-200">
-                    Daftar dengan nama, email, dan password untuk mulai masuk ke dashboard Weesia. Setelah akun aktif, kamu bisa melihat analisa trading, menyimpan pantauan, dan mengelola akses sinyal dengan lebih rapi.
+                    Daftar dengan nama, email, dan password untuk mulai masuk ke dashboard Weesia. Setelah akun aktif, kamu bisa melihat analisa trading, menyimpan pantauan, dan mengelola akses analisa dengan lebih rapi.
                 </p>
             </div>
 
@@ -30,6 +30,13 @@
                     <div class="font-display text-3xl text-ink-50">Registrasi User</div>
                     <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-300">Weesia Member Area</div>
                 </div>
+
+                @if (! empty($checkoutIntent))
+                    <div class="mb-5 flex items-start gap-3 rounded-2xl border border-gold-500/30 bg-gold-500/10 px-4 py-3 text-sm text-gold-100">
+                        <x-icon name="wallet" class="mt-0.5 h-4 w-4 shrink-0 text-gold-200" />
+                        <span>Daftar dulu untuk lanjut ke checkout. Akun baru langsung dapat <span class="font-semibold text-gold-50">5 token gratis</span> untuk buka analisa.</span>
+                    </div>
+                @endif
 
                 @if (isset($errors) && $errors->any())
                     <div class="mb-5 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
@@ -71,14 +78,18 @@
                         </span>
                     </label>
 
-                    <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)]">
+                    <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                         Buat Akun
                         <x-icon name="arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </button>
 
                     <p class="text-center text-xs leading-relaxed text-ink-400">
+                        Dengan mendaftar, kamu memahami bahwa konten Weesia adalah riset &amp; edukasi &mdash; bukan nasihat finansial &mdash; dan menyetujui <a href="{{ route('legal.terms') }}" class="underline underline-offset-2 transition-colors hover:text-gold-200">Ketentuan</a> serta <a href="{{ route('legal.privacy') }}" class="underline underline-offset-2 transition-colors hover:text-gold-200">Kebijakan Privasi</a>.
+                    </p>
+
+                    <p class="text-center text-xs leading-relaxed text-ink-400">
                         Sudah punya akun?
-                        <a href="{{ route('login') }}" class="text-gold-200 transition-colors hover:text-gold-100">Masuk di sini</a>
+                        <a href="{{ route('login', array_filter(['redirect' => request('redirect')])) }}" class="text-gold-200 transition-colors hover:text-gold-100">Masuk di sini</a>
                     </p>
 
                     <a href="{{ route('landing') }}" class="inline-flex w-full items-center justify-center text-sm text-ink-300 transition-colors hover:text-gold-200">Kembali ke halaman utama</a>

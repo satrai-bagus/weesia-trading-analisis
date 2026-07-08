@@ -31,8 +31,8 @@
     @if ($isTodayUpcoming)
         <style>
             @keyframes live-today-pulse {
-                0%, 100% { box-shadow: 0 0 0 0 rgba(212,167,44,0.0), 0 18px 50px -28px rgba(212,167,44,0.55); border-color: rgba(212,167,44,0.55); }
-                50% { box-shadow: 0 0 0 6px rgba(212,167,44,0.10), 0 24px 70px -28px rgba(212,167,44,0.85); border-color: rgba(251,191,36,0.95); }
+                0%, 100% { box-shadow: 0 0 0 0 rgba(23,209,131,0.0), 0 18px 50px -28px rgba(23,209,131,0.55); border-color: rgba(23,209,131,0.55); }
+                50% { box-shadow: 0 0 0 6px rgba(23,209,131,0.10), 0 24px 70px -28px rgba(23,209,131,0.85); border-color: rgba(78,230,161,0.95); }
             }
             @keyframes live-today-sweep {
                 0% { transform: translateX(-100%); }
@@ -42,7 +42,7 @@
         <div class="pointer-events-none absolute inset-x-0 top-0 z-10 h-px overflow-hidden">
             <span class="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-gold-300/90 to-transparent" style="animation: live-today-sweep 2.6s ease-in-out infinite;"></span>
         </div>
-        <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-gold-400/60 bg-gold-500/15 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-gold-100 shadow-[0_10px_30px_-8px_rgba(212,167,44,0.7)]">
+        <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-gold-400/60 bg-gold-500/15 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-gold-100 shadow-[0_10px_30px_-8px_rgba(23,209,131,0.7)]">
             <span class="relative inline-flex h-2 w-2">
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-300 opacity-80"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full bg-gold-300"></span>
@@ -66,16 +66,16 @@
                     <svg class="absolute inset-0 h-full w-full opacity-20" preserveAspectRatio="none" viewBox="0 0 400 240">
                         <defs>
                             <pattern id="lsb-grid-{{ $session->id }}" width="28" height="28" patternUnits="userSpaceOnUse">
-                                <path d="M 28 0 L 0 0 0 28" fill="none" stroke="{{ $isLive ? '#f43f5e' : '#d4a72c' }}" stroke-width="0.6" />
+                                <path d="M 28 0 L 0 0 0 28" fill="none" stroke="{{ $isLive ? '#f43f5e' : '#17d183' }}" stroke-width="0.6" />
                             </pattern>
                             <linearGradient id="lsb-fill-{{ $session->id }}" x1="0" x2="0" y1="0" y2="1">
-                                <stop offset="0%" stop-color="{{ $isLive ? '#f43f5e' : '#d4a72c' }}" stop-opacity="0.4" />
-                                <stop offset="100%" stop-color="{{ $isLive ? '#f43f5e' : '#d4a72c' }}" stop-opacity="0" />
+                                <stop offset="0%" stop-color="{{ $isLive ? '#f43f5e' : '#17d183' }}" stop-opacity="0.4" />
+                                <stop offset="100%" stop-color="{{ $isLive ? '#f43f5e' : '#17d183' }}" stop-opacity="0" />
                             </linearGradient>
                         </defs>
                         <rect width="100%" height="100%" fill="url(#lsb-grid-{{ $session->id }})" />
                         <path d="M0,180 L50,160 L90,168 L130,135 L170,148 L210,118 L250,128 L290,95 L330,108 L370,72 L400,82 L400,240 L0,240 Z" fill="url(#lsb-fill-{{ $session->id }})" />
-                        <path d="M0,180 L50,160 L90,168 L130,135 L170,148 L210,118 L250,128 L290,95 L330,108 L370,72 L400,82" fill="none" stroke="{{ $isLive ? '#fb7185' : '#fbeeb6' }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M0,180 L50,160 L90,168 L130,135 L170,148 L210,118 L250,128 L290,95 L330,108 L370,72 L400,82" fill="none" stroke="{{ $isLive ? '#fb7185' : '#c9f7e0' }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <div class="relative inline-flex h-20 w-20 items-center justify-center rounded-full border {{ $isLive ? 'border-rose-500/40 bg-rose-500/15 text-rose-200' : 'border-gold-500/30 bg-gold-500/10 text-gold-200' }}">
                         @if ($isLive)
@@ -155,7 +155,7 @@
             <div class="flex flex-wrap items-center gap-2 pt-1">
                 @if ($isJoinable)
                     <a href="{{ $session->meeting_link }}" target="_blank" rel="noopener"
-                       class="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-full {{ $isLive ? 'bg-gradient-to-b from-rose-400 to-rose-600 text-ink-50 shadow-[0_18px_50px_-18px_rgba(244,63,94,0.95)] hover:shadow-[0_24px_70px_-18px_rgba(244,63,94,1)]' : 'bg-gradient-to-b from-gold-300 to-gold-500 text-ink-900 shadow-[0_18px_50px_-18px_rgba(212,167,44,0.95)] hover:shadow-[0_24px_70px_-18px_rgba(212,167,44,1)]' }} px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all">
+                       class="group relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden rounded-full {{ $isLive ? 'bg-gradient-to-b from-rose-400 to-rose-600 text-ink-50 shadow-[0_18px_50px_-18px_rgba(244,63,94,0.95)] hover:shadow-[0_24px_70px_-18px_rgba(244,63,94,1)]' : 'bg-gradient-to-b from-gold-300 to-gold-500 text-ink-900 shadow-[0_18px_50px_-18px_rgba(23,209,131,0.95)] hover:shadow-[0_24px_70px_-18px_rgba(23,209,131,1)]' }} px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] transition-all">
                         <span class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"></span>
                         <span class="relative">{{ $isLive ? 'Join Sekarang' : 'Buka Link' }}</span>
                         <x-icon name="arrow-up-right" class="relative h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

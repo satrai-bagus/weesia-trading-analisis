@@ -16,7 +16,7 @@
                 <svg class="h-full w-full" preserveAspectRatio="none">
                     <defs>
                         <pattern id="live-grid" width="42" height="42" patternUnits="userSpaceOnUse">
-                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#d4a72c" stroke-width="0.7" />
+                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#17d183" stroke-width="0.7" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#live-grid)" />

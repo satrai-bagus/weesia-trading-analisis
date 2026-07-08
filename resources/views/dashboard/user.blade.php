@@ -65,7 +65,7 @@
                 <svg class="h-full w-full" preserveAspectRatio="none">
                     <defs>
                         <pattern id="user-dashboard-grid" width="42" height="42" patternUnits="userSpaceOnUse">
-                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#d4a72c" stroke-width="0.7" />
+                            <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#17d183" stroke-width="0.7" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#user-dashboard-grid)" />
@@ -80,9 +80,9 @@
                             <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">User Dashboard</span>
                         </div>
                         <h1 class="mt-5 max-w-3xl font-display text-4xl leading-[1.05] text-ink-50 sm:text-6xl">Meja kerja trader.</h1>
-                        <p class="mt-6 max-w-2xl text-base leading-relaxed text-ink-200">Lihat signal aktif, estimasi profit, posisi pribadi, pantauan market, dan risk plan yang mengikuti harga market secara real-time.</p>
+                        <p class="mt-6 max-w-2xl text-base leading-relaxed text-ink-200">Lihat analisa aktif, estimasi ROI, posisi pribadi, pantauan market, dan risk plan yang mengikuti harga market secara real-time.</p>
                         <div class="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-                            <a href="#signals" class="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)] sm:px-6">
+                            <a href="#signals" class="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-5 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)] sm:px-6">
                                 <x-icon name="target" class="h-4 w-4" />
                                 Analisa Baru
                                 <x-icon name="arrow-up-right" class="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -98,9 +98,9 @@
                 </div>
 
                 <div class="reveal mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-ink-700/60 bg-ink-700/40 sm:grid-cols-2 lg:grid-cols-4">
-                    <x-stat-card label="Signal Tersedia" :value="$stats['total']" change="dipublish admin" />
-                    <x-stat-card label="Signal Aktif" :value="$stats['active']" change="masih berjalan" tone="emerald" />
-                    <x-stat-card label="Winrate Signal" :value="$stats['winrate'].'%'" change="berdasarkan signal selesai" tone="emerald" />
+                    <x-stat-card label="Analisa Tersedia" :value="$stats['total']" change="dipublish admin" />
+                    <x-stat-card label="Analisa Aktif" :value="$stats['active']" change="masih berjalan" tone="emerald" />
+                    <x-stat-card label="Winrate Analisa" :value="$stats['winrate'].'%'" change="berdasarkan analisa selesai" tone="emerald" />
                     <x-stat-card label="Posisi Kamu" :value="$positionCount" :change="$watchlistCount.' pantauan'" />
                 </div>
             </div>
@@ -129,7 +129,7 @@
                             <div class="mt-1 text-xs text-ink-300">Subscription aktif sampai {{ $subscriptionUntil->format('d M Y') }} - semua {{ $signals->count() }} analisa aktif terbuka. <a href="{{ route('user.archive') }}" class="text-gold-200 underline-offset-4 hover:underline">Lihat arsip TP/SL ({{ $archiveCount }})</a>.</div>
                         @else
                             <div class="font-display text-lg text-ink-50">Mode Per-Analisa</div>
-                            <div class="mt-1 text-xs text-ink-300">Saldo {{ number_format($coinBalance, 0, ',', '.') }} koin - {{ $lockedCount }} signal aktif terkunci. <a href="{{ route('user.archive') }}" class="text-gold-200 underline-offset-4 hover:underline">{{ $archiveCount }} arsip TP/SL gratis</a>.</div>
+                            <div class="mt-1 text-xs text-ink-300">Saldo {{ number_format($coinBalance, 0, ',', '.') }} koin - {{ $lockedCount }} analisa aktif terkunci. <a href="{{ route('user.archive') }}" class="text-gold-200 underline-offset-4 hover:underline">{{ $archiveCount }} arsip TP/SL gratis</a>.</div>
                         @endif
                     </div>
                 </div>
@@ -151,17 +151,17 @@
                                 <x-icon name="trending-up" class="h-5 w-5" />
                             </span>
                             <div>
-                                <h2 class="font-display text-2xl leading-none text-ink-50">Sinyal Trading</h2>
+                                <h2 class="font-display text-2xl leading-none text-ink-50">Analisa Trading</h2>
                                 <div class="mt-1 font-mono text-[10px] uppercase tracking-[0.24em] text-ink-300">Real-time</div>
                             </div>
                         </div>
                         @if ($signals->count() > 7)
                             <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
                                 <span data-carousel-status class="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-300"></span>
-                                <button type="button" data-carousel-prev aria-label="Signal sebelumnya" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-600/70 text-ink-200 transition-all hover:border-gold-500/50 hover:text-gold-100 disabled:cursor-not-allowed disabled:opacity-35">
+                                <button type="button" data-carousel-prev aria-label="Analisa sebelumnya" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-600/70 text-ink-200 transition-all hover:border-gold-500/50 hover:text-gold-100 disabled:cursor-not-allowed disabled:opacity-35">
                                     <x-icon name="arrow-right" class="h-4 w-4 rotate-180" />
                                 </button>
-                                <button type="button" data-carousel-next aria-label="Signal berikutnya" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-500/25 bg-gold-500/10 text-gold-100 transition-all hover:border-gold-400/70 disabled:cursor-not-allowed disabled:opacity-35">
+                                <button type="button" data-carousel-next aria-label="Analisa berikutnya" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-500/25 bg-gold-500/10 text-gold-100 transition-all hover:border-gold-400/70 disabled:cursor-not-allowed disabled:opacity-35">
                                     <x-icon name="arrow-right" class="h-4 w-4" />
                                 </button>
                             </div>
@@ -249,7 +249,7 @@
                                             <x-level label="Risk SL" :value="$percent($roiTo($signal, $signal->stop_loss))" tone="rose" data-roi-sl />
                                         </div>
                                         <p class="mt-4 text-sm leading-relaxed text-ink-300">
-                                            {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Signal masih berjalan. Estimasi ROI memakai harga live realtime sebagai entry.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss. Evaluasi risk sebelum entry berikutnya.' : 'Harga sudah mencapai target profit.') }}
+                                            {{ $signal->status === \App\Models\TradeSignal::STATUS_ACTIVE ? 'Analisa masih berjalan. Estimasi ROI memakai harga live realtime sebagai entry.' : ($signal->status === \App\Models\TradeSignal::STATUS_HIT_SL ? 'Harga menyentuh stop loss. Evaluasi risk sebelum entry berikutnya.' : 'Harga sudah menyentuh target.') }}
                                         </p>
 
                                         <div class="mt-5 flex flex-col gap-3 rounded-2xl border border-ink-700/60 bg-ink-800/45 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -329,10 +329,10 @@
                             @else
                                 <article data-carousel-item data-filter-ticker="{{ $signal->ticker }}" data-filter-ticker-key="{{ preg_replace('/[^a-z0-9]/', '', strtolower($signal->ticker)) }}" data-filter-side="{{ $signal->position_side }}" data-filter-status="{{ $signal->status }}" data-filter-access="{{ $unlocked ? 'open' : 'locked' }}" class="grid grid-cols-1 overflow-hidden rounded-2xl border border-ink-700/60 bg-ink-900 transition-colors hover:bg-ink-800/45">
                                     <div class="grid grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)] xl:grid-cols-[430px_minmax(0,1fr)]">
-                                        <div class="relative flex h-[260px] items-center justify-center overflow-hidden border-b border-ink-700/60 bg-[radial-gradient(circle_at_50%_30%,rgba(212,167,44,0.12),transparent_60%)] lg:h-auto lg:border-b-0 lg:border-r">
+                                        <div class="relative flex h-[260px] items-center justify-center overflow-hidden border-b border-ink-700/60 bg-[radial-gradient(circle_at_50%_30%,rgba(23,209,131,0.12),transparent_60%)] lg:h-auto lg:border-b-0 lg:border-r">
                                             <div class="pointer-events-none absolute inset-0 opacity-30">
                                                 <svg class="h-full w-full" viewBox="0 0 360 200" preserveAspectRatio="none">
-                                                    <path d="M0,140 L40,120 L80,128 L120,90 L160,104 L200,68 L240,80 L280,46 L320,56 L360,40" fill="none" stroke="rgba(212,167,44,0.5)" stroke-width="1.5" stroke-dasharray="3 6" />
+                                                    <path d="M0,140 L40,120 L80,128 L120,90 L160,104 L200,68 L240,80 L280,46 L320,56 L360,40" fill="none" stroke="rgba(23,209,131,0.5)" stroke-width="1.5" stroke-dasharray="3 6" />
                                                 </svg>
                                             </div>
                                             <div class="relative flex flex-col items-center gap-3 text-center">
@@ -368,7 +368,7 @@
                                                 @endforeach
                                             </div>
 
-                                            <p class="mt-4 text-sm leading-relaxed text-ink-300">Buka analisa ini untuk lihat entry, target profit, stop loss, dan ROI lengkap.</p>
+                                            <p class="mt-4 text-sm leading-relaxed text-ink-300">Buka analisa ini untuk lihat entry, take profit, stop loss, dan ROI lengkap.</p>
 
                                             <div class="mt-5 flex flex-col gap-3 rounded-2xl border border-gold-500/30 bg-gold-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
                                                 <div class="flex items-center gap-3">
@@ -380,19 +380,26 @@
                                                         <div class="text-sm text-ink-50"><span class="font-display text-2xl text-gold-200">{{ $cost }}</span> koin</div>
                                                     </div>
                                                 </div>
-                                                <button type="button"
-                                                        data-unlock-trigger
-                                                        data-signal-id="{{ $signal->id }}"
-                                                        data-signal-ticker="{{ $signal->ticker }}"
-                                                        data-signal-side="{{ $signal->sideLabel() }}"
-                                                        data-signal-leverage="{{ $signal->leverageValue() }}"
-                                                        data-signal-cost="{{ $cost }}"
-                                                        data-signal-action="{{ route('signals.unlock', $signal) }}"
-                                                        @disabled($coinBalance < $cost)
-                                                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:bg-gold-300 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400 sm:w-auto">
-                                                    <x-icon name="lock" class="h-4 w-4" />
-                                                    {{ $coinBalance < $cost ? 'Saldo kurang' : 'Buka Analisa' }}
-                                                </button>
+                                                @if ($coinBalance < $cost)
+                                                    <a href="{{ route('checkout') }}"
+                                                       class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gold-500/40 bg-gold-500/10 px-5 py-2.5 text-sm font-semibold text-gold-100 transition-colors hover:border-gold-400/70 hover:bg-gold-500/20 sm:w-auto">
+                                                        <x-icon name="wallet" class="h-4 w-4" />
+                                                        Kurang {{ $cost - $coinBalance }} token &middot; Top Up
+                                                    </a>
+                                                @else
+                                                    <button type="button"
+                                                            data-unlock-trigger
+                                                            data-signal-id="{{ $signal->id }}"
+                                                            data-signal-ticker="{{ $signal->ticker }}"
+                                                            data-signal-side="{{ $signal->sideLabel() }}"
+                                                            data-signal-leverage="{{ $signal->leverageValue() }}"
+                                                            data-signal-cost="{{ $cost }}"
+                                                            data-signal-action="{{ route('signals.unlock', $signal) }}"
+                                                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition-colors hover:bg-gold-300 sm:w-auto">
+                                                        <x-icon name="lock" class="h-4 w-4" />
+                                                        Buka Analisa
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -400,19 +407,19 @@
                             @endif
                         @empty
                             <div class="rounded-2xl border border-dashed border-gold-500/25 bg-ink-800/35 p-8 text-center">
-                                <div class="font-display text-2xl text-ink-50">Belum ada signal trading.</div>
-                                <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Signal dari admin akan muncul di sini setelah dipublish.</p>
+                                <div class="font-display text-2xl text-ink-50">Belum ada analisa trading.</div>
+                                <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Analisa dari admin akan muncul di sini setelah dipublish.</p>
                             </div>
                         @endforelse
                     </div>
 
                     <div data-signal-filter-empty class="hidden rounded-2xl border border-dashed border-gold-500/25 bg-ink-800/35 p-8 text-center">
-                        <div class="font-display text-2xl text-ink-50">Filter belum menemukan signal.</div>
+                        <div class="font-display text-2xl text-ink-50">Filter belum menemukan analisa.</div>
                         <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Coba ticker lain, ubah status, atau reset filter untuk melihat semua analisa.</p>
                     </div>
                 </div>
 
-                <a href="{{ route('user.positions') }}" id="watchlist" class="reveal group block overflow-hidden rounded-2xl border border-gold-500/20 bg-[linear-gradient(120deg,rgba(212,167,44,0.08),rgba(18,18,16,0.85)_55%)] p-5 backdrop-blur-xl transition-all hover:border-gold-400/45 hover:shadow-[0_28px_70px_-40px_rgba(212,167,44,0.6)] sm:p-6">
+                <a href="{{ route('user.positions') }}" id="watchlist" class="reveal group block overflow-hidden rounded-2xl border border-gold-500/20 bg-[linear-gradient(120deg,rgba(23,209,131,0.08),rgba(18,18,16,0.85)_55%)] p-5 backdrop-blur-xl transition-all hover:border-gold-400/45 hover:shadow-[0_28px_70px_-40px_rgba(23,209,131,0.6)] sm:p-6">
                     <div class="flex flex-col items-start gap-5 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex items-start gap-4">
                             <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-gold-500/30 bg-gold-500/10 text-gold-200">
@@ -491,14 +498,14 @@
                     <div class="space-y-4">
                         @forelse ($timeline as $item)
                             <div class="flex gap-3 border-b border-ink-700/60 pb-4 last:border-0 last:pb-0">
-                                <span class="mt-1 h-2 w-2 rounded-full bg-gold-400 shadow-[0_0_14px_rgba(212,167,44,0.8)]"></span>
+                                <span class="mt-1 h-2 w-2 rounded-full bg-gold-400 shadow-[0_0_14px_rgba(23,209,131,0.8)]"></span>
                                 <div>
                                     <p class="text-sm leading-relaxed text-ink-100">{{ $item }}</p>
                                     <div class="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-300">baru saja</div>
                                 </div>
                             </div>
                         @empty
-                            <div class="text-sm leading-relaxed text-ink-300">Belum ada signal dari admin untuk ditampilkan.</div>
+                            <div class="text-sm leading-relaxed text-ink-300">Belum ada analisa dari admin untuk ditampilkan.</div>
                         @endforelse
                     </div>
                 </div>
@@ -531,7 +538,7 @@
                     <div class="mt-5 font-mono text-[10px] uppercase tracking-[0.26em] text-gold-300">Registrasi Berhasil</div>
                     <h2 class="mt-3 font-display text-3xl leading-tight text-ink-50">Selamat datang, {{ auth()->user()->name }}.</h2>
                     <p class="mt-3 text-sm leading-relaxed text-ink-300">
-                        Akun kamu sudah aktif dan siap digunakan untuk melihat analisa trading, menyimpan pantauan, dan mengelola akses sinyal dari dashboard.
+                        Akun kamu sudah aktif dan siap digunakan untuk melihat analisa trading, menyimpan pantauan, dan mengelola akses analisa dari dashboard.
                     </p>
                 </div>
 

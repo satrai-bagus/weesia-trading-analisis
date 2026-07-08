@@ -42,8 +42,19 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        $activeSignals = $signals
+            ->where('status', TradeSignal::STATUS_ACTIVE)
+            ->values();
+        $archivedSignals = $signals
+            ->filter(fn (TradeSignal $signal) => $signal->isClosed())
+            ->sortByDesc(fn (TradeSignal $signal) => $signal->auto_hit_at ?? $signal->updated_at)
+            ->values();
+
         return [
             'signals' => $signals,
+            'activeSignals' => $activeSignals,
+            'archivedSignals' => $archivedSignals,
+            'archiveTickers' => $archivedSignals->pluck('ticker')->unique()->values(),
             'stats' => $this->stats(),
             'marketTickers' => $marketData->usdtTickers(),
             'priceMap' => $priceMap,

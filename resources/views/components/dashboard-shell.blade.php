@@ -39,8 +39,8 @@
             <a href="{{ route('landing') }}" class="flex min-w-0 items-center gap-2 sm:gap-3">
                 <x-brand-mark />
                 <span class="min-w-0 leading-none">
-                    <span class="block truncate font-display text-base text-ink-50 sm:text-lg">Weesia</span>
-                    <span class="block truncate font-mono text-[8px] uppercase tracking-[0.22em] text-gold-400/80 max-[380px]:hidden sm:text-[9px] sm:tracking-[0.25em]">FibPath Analyzer</span>
+                    <span class="block truncate font-mono text-[13px] font-semibold uppercase tracking-[0.3em] text-ink-50 sm:text-[15px] sm:tracking-[0.34em]">Weesia</span>
+                    <span class="mt-1 block truncate font-mono text-[8px] uppercase tracking-[0.22em] text-gold-400/80 max-[380px]:hidden sm:text-[9px] sm:tracking-[0.25em]">FibPath Analyzer</span>
                 </span>
             </a>
 
@@ -95,7 +95,7 @@
                         <span>{{ number_format($shellCoinBalance, 0, ',', '.') }} <span class="hidden sm:inline">koin</span></span>
                     </a>
                     <a href="{{ route('checkout') }}"
-                       class="hidden md:inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-900 shadow-[0_10px_30px_-10px_rgba(212,167,44,0.7)] transition-all hover:shadow-[0_14px_40px_-10px_rgba(212,167,44,0.95)]">
+                       class="hidden md:inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-900 shadow-[0_10px_30px_-10px_rgba(23,209,131,0.7)] transition-all hover:shadow-[0_14px_40px_-10px_rgba(23,209,131,0.95)]">
                         {{ $shellHasSubscription ? 'Perpanjang' : 'Beli Token' }}
                         <x-icon name="arrow-right" class="h-3.5 w-3.5" />
                     </a>
@@ -109,7 +109,7 @@
                 <div class="relative" data-alert-bell>
                     <button type="button"
                             data-alert-toggle
-                            aria-label="Notifikasi signal"
+                            aria-label="Notifikasi analisa"
                             class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold-500/20 bg-gold-500/10 text-gold-100 transition-all hover:border-gold-400/70">
                         <x-icon name="bell" class="h-4 w-4" />
                         <span data-alert-badge
@@ -137,7 +137,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <div data-alert-empty class="px-4 py-6 text-center text-xs text-ink-300">Belum ada signal yang hit.</div>
+                                <div data-alert-empty class="px-4 py-6 text-center text-xs text-ink-300">Belum ada analisa yang menyentuh level.</div>
                             @endforelse
                         </div>
                     </div>

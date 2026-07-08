@@ -140,7 +140,7 @@
                                     <span class="block font-mono text-[10px] uppercase tracking-[0.22em] text-gold-300">No WhatsApp (untuk notif)</span>
                                     <input type="tel" name="whatsapp_number" value="{{ $order->whatsapp_number }}" placeholder="08xxxxxxxxxx" class="mt-2 block w-full rounded-2xl border border-ink-700/70 bg-ink-800/60 px-4 py-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
                                 </label>
-                                <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(212,167,44,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(212,167,44,1)]">
+                                <button class="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                                     Kirim Bukti Transfer
                                     <x-icon name="send" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </button>
