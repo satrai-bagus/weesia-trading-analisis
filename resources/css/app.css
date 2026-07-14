@@ -7,7 +7,7 @@
 
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Playfair Display', Georgia, serif;
+    --font-display: 'Fraunces', Georgia, serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
     --color-ink-50: #ffffff;
@@ -94,10 +94,43 @@ body {
 @layer utilities {
     .font-display {
         font-family: var(--font-display);
+        font-optical-sizing: auto;
+        font-weight: 600;
+        letter-spacing: -0.015em;
     }
 
     .font-mono {
         font-family: var(--font-mono);
+    }
+
+    /* Scrollbar tipis menyatu tema (sidebar, panel notifikasi, dsb).
+       Catatan: saat scrollbar-width/color di-set, Chrome mengabaikan
+       ::-webkit-scrollbar — jadi rule webkit di bawah hanya untuk Safari. */
+    .scrollbar-slim {
+        scrollbar-width: thin;
+        scrollbar-color: #1a1a17 transparent;
+    }
+
+    .scrollbar-slim:hover {
+        scrollbar-color: #0fae6b transparent;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-thumb {
+        background: #1a1a17;
+        border-radius: 999px;
+    }
+
+    .scrollbar-slim::-webkit-scrollbar-thumb:hover {
+        background: #0fae6b;
     }
 
     .text-gold-gradient {

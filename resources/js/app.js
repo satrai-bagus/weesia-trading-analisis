@@ -394,7 +394,10 @@ function setupSignalCarousels() {
         }
 
         const render = () => {
-            const visibleItems = items.filter((item) => item.dataset.filterHidden !== 'true');
+            // Baca ulang urutan dari DOM supaya pagination mengikuti hasil
+            // sorting ROI live (sortItems menyusun ulang node di dalam list).
+            const orderedItems = Array.from(carousel.querySelectorAll('[data-carousel-item]'));
+            const visibleItems = orderedItems.filter((item) => item.dataset.filterHidden !== 'true');
             const pageCount = Math.max(Math.ceil(visibleItems.length / pageSize), 1);
             page = Math.min(page, pageCount - 1);
 
@@ -402,7 +405,7 @@ function setupSignalCarousels() {
             const end = Math.min(start + pageSize, visibleItems.length);
             const pageItems = new Set(visibleItems.slice(start, end));
 
-            items.forEach((item) => {
+            orderedItems.forEach((item) => {
                 item.classList.toggle('hidden', !pageItems.has(item));
             });
 
@@ -430,7 +433,8 @@ function setupSignalCarousels() {
         });
 
         next?.addEventListener('click', () => {
-            const visibleItems = items.filter((item) => item.dataset.filterHidden !== 'true');
+            const orderedItems = Array.from(carousel.querySelectorAll('[data-carousel-item]'));
+            const visibleItems = orderedItems.filter((item) => item.dataset.filterHidden !== 'true');
             const pageCount = Math.max(Math.ceil(visibleItems.length / pageSize), 1);
             page = Math.min(page + 1, pageCount - 1);
             render();
@@ -605,6 +609,7 @@ function readChartConfig(element) {
     const closeLabel = element.dataset.chartCloseLabel || '';
 
     return {
+        minimal: element.dataset.chartMinimal === 'true',
         ticker: element.dataset.chartTicker || 'BTC/USDT',
         entry: entry || current || tp1 || sl || 1,
         current: current || entry || tp1 || sl || 1,
@@ -717,7 +722,10 @@ function setupModals() {
 
     document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return;
-        const open = document.querySelector('[data-modal]:not([hidden])');
+        // Tutup modal paling atas (paling akhir di DOM) saat ada modal bertumpuk,
+        // mis. fullscreen chart yang dibuka dari dalam modal detail signal.
+        const openModals = document.querySelectorAll('[data-modal]:not([hidden])');
+        const open = openModals[openModals.length - 1];
         if (open) closeModal(open);
     });
 
@@ -906,6 +914,13 @@ function setupSignalLiveRoi() {
         const updateRow = (row) => {
             const ticker = row.dataset.signalTicker;
             const live = lastPrices.get(ticker);
+
+            // Tanpa harga live, pertahankan nilai fallback hasil render server
+            // (dihitung dari entry price) daripada menimpanya dengan "-".
+            if (!Number.isFinite(live) || live <= 0) {
+                return;
+            }
+
             const tp1 = Number(row.dataset.signalTp1);
             const tp2Raw = Number(row.dataset.signalTp2);
             const tp2 = Number.isFinite(tp2Raw) && tp2Raw > 0 ? tp2Raw : null;
@@ -1382,9 +1397,10 @@ function createLiveSignalChart(container, config) {
 
         const compact = state.width < 520 || state.height < 380;
         const fullscreen = state.width > 800 && state.height > 520;
-        const pad = compact ? 18 : Math.min(Math.max(state.width * 0.055, 38), 74);
-        const headerH = compact ? 56 : fullscreen ? 116 : 82;
-        const bottomH = compact ? 60 : fullscreen ? 150 : 104;
+        const minimal = Boolean(config.minimal);
+        const pad = minimal ? 12 : compact ? 18 : Math.min(Math.max(state.width * 0.055, 38), 74);
+        const headerH = minimal ? 4 : compact ? 56 : fullscreen ? 116 : 82;
+        const bottomH = minimal ? 4 : compact ? 60 : fullscreen ? 150 : 104;
         const chartX = pad;
         const chartY = headerH + (compact ? 8 : 20);
         const chartW = state.width - pad * 2;
@@ -1419,59 +1435,61 @@ function createLiveSignalChart(container, config) {
         context.fillStyle = halo;
         context.fillRect(0, 0, state.width, state.height);
 
-        drawText(compact ? config.ticker : 'LIVE MARKET PULSE', pad, compact ? 30 : 34, {
-            color: compact ? '#f5f3ee' : '#8a877e',
-            family: compact ? 'Georgia, serif' : 'JetBrains Mono, ui-monospace, monospace',
-            size: compact ? 26 : 13,
-            weight: compact ? 700 : 400,
-            letterSpacing: compact ? 0 : 7,
-        });
-        if (!compact) {
-            drawText('FibPath Live', pad, fullscreen ? 88 : 74, {
-                color: '#f5f3ee',
-                family: 'Georgia, serif',
-                size: fullscreen ? 58 : 36,
-                weight: 700,
+        if (!minimal) {
+            drawText(compact ? config.ticker : 'LIVE MARKET PULSE', pad, compact ? 30 : 34, {
+                color: compact ? '#f5f3ee' : '#8a877e',
+                family: compact ? 'Fraunces, Georgia, serif' : 'JetBrains Mono, ui-monospace, monospace',
+                size: compact ? 26 : 13,
+                weight: compact ? 700 : 400,
+                letterSpacing: compact ? 0 : 7,
             });
-            drawText(`${config.side.toUpperCase()} ${config.leverage}X  /  ${liveSignalTimeframe} LIVE PULSE  /  ${config.ticker}`, pad, fullscreen ? 122 : 100, {
-                color: '#17d183',
-                size: 11,
-                letterSpacing: 4,
-            });
-        } else {
-            drawText(`${config.side.toUpperCase()} ${config.leverage}X  /  ${liveSignalTimeframe}`, pad, 50, {
-                color: '#17d183',
-                size: 10,
-                letterSpacing: 3,
-            });
-        }
+            if (!compact) {
+                drawText('FibPath Live', pad, fullscreen ? 88 : 74, {
+                    color: '#f5f3ee',
+                    family: 'Fraunces, Georgia, serif',
+                    size: fullscreen ? 58 : 36,
+                    weight: 700,
+                });
+                drawText(`${config.side.toUpperCase()} ${config.leverage}X  /  ${liveSignalTimeframe} LIVE PULSE  /  ${config.ticker}`, pad, fullscreen ? 122 : 100, {
+                    color: '#17d183',
+                    size: 11,
+                    letterSpacing: 4,
+                });
+            } else {
+                drawText(`${config.side.toUpperCase()} ${config.leverage}X  /  ${liveSignalTimeframe}`, pad, 50, {
+                    color: '#17d183',
+                    size: 10,
+                    letterSpacing: 3,
+                });
+            }
 
-        if (!compact) {
-            const pulseX = state.width - pad - 58;
-            const pulseY = fullscreen ? 68 : 48;
+            if (!compact) {
+                const pulseX = state.width - pad - 58;
+                const pulseY = fullscreen ? 68 : 48;
+                context.beginPath();
+                context.arc(pulseX, pulseY, fullscreen ? 42 : 30, 0, Math.PI * 2);
+                context.fillStyle = 'rgba(47, 199, 124, 0.12)';
+                context.fill();
+                context.strokeStyle = 'rgba(47, 199, 124, 0.32)';
+                context.stroke();
+                context.strokeStyle = '#8ef0b3';
+                context.lineWidth = 3;
+                context.beginPath();
+                context.moveTo(pulseX - 22, pulseY + 4);
+                context.lineTo(pulseX - 8, pulseY + 4);
+                context.lineTo(pulseX - 2, pulseY - 18);
+                context.lineTo(pulseX + 9, pulseY + 18);
+                context.lineTo(pulseX + 15, pulseY + 2);
+                context.lineTo(pulseX + 26, pulseY + 2);
+                context.stroke();
+            }
+
+            context.strokeStyle = 'rgba(245, 243, 238, 0.08)';
             context.beginPath();
-            context.arc(pulseX, pulseY, fullscreen ? 42 : 30, 0, Math.PI * 2);
-            context.fillStyle = 'rgba(47, 199, 124, 0.12)';
-            context.fill();
-            context.strokeStyle = 'rgba(47, 199, 124, 0.32)';
-            context.stroke();
-            context.strokeStyle = '#8ef0b3';
-            context.lineWidth = 3;
-            context.beginPath();
-            context.moveTo(pulseX - 22, pulseY + 4);
-            context.lineTo(pulseX - 8, pulseY + 4);
-            context.lineTo(pulseX - 2, pulseY - 18);
-            context.lineTo(pulseX + 9, pulseY + 18);
-            context.lineTo(pulseX + 15, pulseY + 2);
-            context.lineTo(pulseX + 26, pulseY + 2);
+            context.moveTo(pad, headerH);
+            context.lineTo(state.width - pad, headerH);
             context.stroke();
         }
-
-        context.strokeStyle = 'rgba(245, 243, 238, 0.08)';
-        context.beginPath();
-        context.moveTo(pad, headerH);
-        context.lineTo(state.width - pad, headerH);
-        context.stroke();
 
         roundedRect(chartX, chartY, chartW, chartH, compact ? 18 : 28);
         context.fillStyle = 'rgba(0, 0, 0, 0.34)';
@@ -1581,29 +1599,31 @@ function createLiveSignalChart(container, config) {
         context.shadowBlur = 0;
         context.restore();
 
-        const bottomY = chartBottom + (compact ? 10 : 26);
-        const gap = compact ? 8 : 18;
-        const metricH = compact ? 48 : 88;
-        const metricW = (state.width - pad * 2 - gap * 2) / 3;
-        const bottomLabel = config.showEntry ? 'ENTRY' : (config.frozen ? 'CLOSED' : 'LIVE');
-        drawMetric(pad, bottomY, metricW, metricH, bottomLabel, money(config.showEntry ? config.entry : state.price), '#f5f3ee', compact ? '' : config.ticker);
-        drawMetric(pad + metricW + gap, bottomY, metricW, metricH, 'TP1', money(config.tp1), '#6fe0a8', compact ? '' : percent(config.tp1));
-        drawMetric(pad + (metricW + gap) * 2, bottomY, metricW, metricH, 'SL', money(config.sl), '#fda4af', compact ? '' : percent(config.sl));
+        if (!minimal) {
+            const bottomY = chartBottom + (compact ? 10 : 26);
+            const gap = compact ? 8 : 18;
+            const metricH = compact ? 48 : 88;
+            const metricW = (state.width - pad * 2 - gap * 2) / 3;
+            const bottomLabel = config.showEntry ? 'ENTRY' : (config.frozen ? 'CLOSED' : 'LIVE');
+            drawMetric(pad, bottomY, metricW, metricH, bottomLabel, money(config.showEntry ? config.entry : state.price), '#f5f3ee', compact ? '' : config.ticker);
+            drawMetric(pad + metricW + gap, bottomY, metricW, metricH, 'TP1', money(config.tp1), '#6fe0a8', compact ? '' : percent(config.tp1));
+            drawMetric(pad + (metricW + gap) * 2, bottomY, metricW, metricH, 'SL', money(config.sl), '#fda4af', compact ? '' : percent(config.sl));
 
-        if (!compact) {
-            drawText(config.showEntry
-                ? `Live ${money(state.price)}  /  Entry ${money(config.entry)}  /  PnL ${percent(state.price)}`
-                : `Live ${money(state.price)}  /  TP1 ${percent(config.tp1)}  /  Risk ${percent(config.sl)}`, pad, state.height - 28, {
-                color: '#8a877e',
-                size: 11,
-                letterSpacing: 2,
-            });
-            drawText('WEESIA', state.width - pad, state.height - 28, {
-                color: '#17d183',
-                size: 10,
-                align: 'right',
-                letterSpacing: 4,
-            });
+            if (!compact) {
+                drawText(config.showEntry
+                    ? `Live ${money(state.price)}  /  Entry ${money(config.entry)}  /  PnL ${percent(state.price)}`
+                    : `Live ${money(state.price)}  /  TP1 ${percent(config.tp1)}  /  Risk ${percent(config.sl)}`, pad, state.height - 28, {
+                    color: '#8a877e',
+                    size: 11,
+                    letterSpacing: 2,
+                });
+                drawText('WEESIA', state.width - pad, state.height - 28, {
+                    color: '#17d183',
+                    size: 10,
+                    align: 'right',
+                    letterSpacing: 4,
+                });
+            }
         }
     };
 

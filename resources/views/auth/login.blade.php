@@ -18,7 +18,7 @@
                     <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Member Access</span>
                 </div>
                 <h1 class="mt-6 max-w-3xl font-display text-5xl leading-[1.05] text-ink-50 sm:text-6xl">
-                    Akses analisa crypto <span class="text-gold-gradient font-accent italic">FibPath.</span>
+                    Akses analisa crypto <span class="text-gold-gradient italic">FibPath.</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-base leading-relaxed text-ink-200">
                     Daftar atau masuk pakai akun Google &mdash; tanpa password ribet. Akun baru otomatis dapat <span class="text-gold-200">5 token gratis</span> untuk coba analisa FibPath pertama kamu.

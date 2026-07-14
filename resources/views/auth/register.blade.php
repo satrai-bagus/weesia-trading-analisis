@@ -18,7 +18,7 @@
                     <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Create Account</span>
                 </div>
                 <h1 class="mt-6 max-w-3xl font-display text-5xl leading-[1.05] text-ink-50 sm:text-6xl">
-                    Mulai akses analisa <span class="text-gold-gradient font-accent italic">Weesia.</span>
+                    Mulai akses analisa <span class="text-gold-gradient italic">Weesia.</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-base leading-relaxed text-ink-200">
                     Daftar dengan nama, email, dan password untuk mulai masuk ke dashboard Weesia. Setelah akun aktif, kamu bisa melihat analisa trading, menyimpan pantauan, dan mengelola akses analisa dengan lebih rapi.
