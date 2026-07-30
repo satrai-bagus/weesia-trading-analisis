@@ -83,6 +83,43 @@ class UserDashboardTest extends TestCase
             ->assertDontSee('data-signal-tp1', false);
     }
 
+    public function test_unread_auto_hit_shows_digest_on_dashboard(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'last_hit_seen_at' => now()->subDay(),
+        ]);
+        $this->signal([
+            'ticker' => 'ETH/USDT',
+            'status' => TradeSignal::STATUS_HIT_TP,
+            'auto_hit_at' => now()->subMinutes(7),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('user.dashboard'))
+            ->assertOk()
+            ->assertSee('data-alert-digest', false)
+            ->assertSee('1 analisa menyentuh levelnya dan belum kamu baca.')
+            ->assertSee('ETH/USDT');
+    }
+
+    public function test_digest_is_hidden_when_every_alert_is_read(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'last_hit_seen_at' => now(),
+        ]);
+        $this->signal([
+            'status' => TradeSignal::STATUS_HIT_TP,
+            'auto_hit_at' => now()->subMinutes(7),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('user.dashboard'))
+            ->assertOk()
+            ->assertDontSee('menyentuh levelnya dan belum kamu baca');
+    }
+
     private function signal(array $overrides = []): TradeSignal
     {
         return TradeSignal::create(array_merge([

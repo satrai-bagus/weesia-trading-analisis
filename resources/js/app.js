@@ -26,6 +26,8 @@ ready(() => {
     setupTp2Field();
     setupFilePickers();
     setupAlertBell();
+    setupAlertDigest();
+    setupTokenPicker();
     setupModals();
     setupUnlockConfirm();
     setupLivePriceCards();
@@ -1035,7 +1037,6 @@ function setupAlertBell() {
     const list = bell.querySelector('[data-alert-list]');
     const clearBtn = bell.querySelector('[data-alert-clear]');
     const toastHost = document.querySelector('[data-alert-toast-host]');
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
     const seenIds = new Set(
         Array.from(list?.querySelectorAll('[data-alert-item]') || []).map((el) => el.getAttribute('data-alert-item')),
@@ -1136,27 +1137,150 @@ function setupAlertBell() {
         }
     });
 
-    clearBtn?.addEventListener('click', async () => {
-        try {
-            const response = await fetch('/alerts/seen', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrf,
-                },
-            });
-            if (!response.ok) return;
-            const payload = await response.json();
-            applyPayload(payload.alerts);
-        } catch (error) {
-            // ignore
-        }
+    clearBtn?.addEventListener('click', () => {
+        markAlertsSeen();
     });
 
     window.addEventListener('weesia:alerts', (event) => {
         applyPayload(event.detail, { toast: true });
     });
+}
+
+// Marks every auto-hit alert as read, then broadcasts the fresh payload so the
+// bell dropdown and the dashboard digest stay in sync from a single request.
+async function markAlertsSeen() {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    try {
+        const response = await fetch('/alerts/seen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+        });
+        if (!response.ok) return null;
+        const payload = await response.json();
+        if (payload.alerts) {
+            window.dispatchEvent(new CustomEvent('weesia:alerts', { detail: payload.alerts }));
+        }
+
+        return payload.alerts || null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function setupAlertDigest() {
+    const digest = document.querySelector('[data-alert-digest]');
+    if (!digest) {
+        return;
+    }
+
+    const list = digest.querySelector('[data-alert-digest-list]');
+    const countEl = digest.querySelector('[data-alert-digest-count]');
+    const headline = digest.querySelector('[data-alert-digest-headline]');
+    const clearBtn = digest.querySelector('[data-alert-digest-clear]');
+    const maxItems = 6;
+
+    const toneClass = (tone) => {
+        if (tone === 'rose') return 'border-rose-500/30 bg-rose-500/10 text-rose-200';
+        if (tone === 'emerald') return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
+        return 'border-gold-500/30 bg-gold-500/10 text-gold-200';
+    };
+
+    const dotClass = (tone) => {
+        if (tone === 'rose') return 'bg-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.7)]';
+        if (tone === 'emerald') return 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.7)]';
+        return 'bg-gold-400';
+    };
+
+    const render = (payload) => {
+        const unread = (Array.isArray(payload?.items) ? payload.items : []).filter((item) => item.is_unread);
+        const total = Math.max(Number(payload?.unread_count) || 0, unread.length);
+
+        if (!total) {
+            digest.classList.add('hidden');
+            return;
+        }
+
+        const items = unread.slice(0, maxItems);
+        const rest = total - items.length;
+
+        if (countEl) countEl.textContent = `${total} baru`;
+        if (headline) headline.textContent = `${total} analisa menyentuh levelnya dan belum kamu baca.`;
+
+        if (list) {
+            list.innerHTML = '';
+            items.forEach((item) => {
+                const node = document.createElement('li');
+                node.setAttribute('data-alert-digest-item', String(item.id));
+                node.className = 'flex items-center justify-between gap-3 rounded-xl border border-ink-700/60 bg-ink-900/60 px-3 py-2.5';
+                node.innerHTML = `
+                    <span class="flex min-w-0 items-center gap-2.5">
+                        <span class="h-2 w-2 shrink-0 rounded-full ${dotClass(item.tone)}"></span>
+                        <span class="min-w-0">
+                            <span data-ticker class="block truncate font-display text-sm text-ink-50"></span>
+                            <span data-meta class="mt-0.5 block truncate font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400"></span>
+                        </span>
+                    </span>
+                    <span data-status class="shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] ${toneClass(item.tone)}"></span>
+                `;
+                node.querySelector('[data-ticker]').textContent = item.ticker;
+                node.querySelector('[data-meta]').textContent = `${item.side} ${item.leverage}x - ${item.auto_hit_human}`;
+                node.querySelector('[data-status]').textContent = item.status_label;
+                list.appendChild(node);
+            });
+
+            if (rest > 0) {
+                const more = document.createElement('li');
+                more.setAttribute('data-alert-digest-rest', '');
+                more.className = 'flex items-center justify-center rounded-xl border border-dashed border-ink-700/60 px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400';
+                more.textContent = `+${rest} lainnya di lonceng`;
+                list.appendChild(more);
+            }
+        }
+
+        digest.classList.remove('hidden');
+        digest.classList.add('is-visible');
+    };
+
+    clearBtn?.addEventListener('click', () => {
+        markAlertsSeen();
+    });
+
+    window.addEventListener('weesia:alerts', (event) => {
+        render(event.detail);
+    });
+}
+
+function setupTokenPicker() {
+    const picker = document.querySelector('[data-token-picker]');
+    if (!picker) {
+        return;
+    }
+
+    const radios = picker.querySelectorAll('input[type="radio"][name="package_key"]');
+    if (!radios.length) {
+        return;
+    }
+
+    const priceEl = picker.querySelector('[data-token-summary-price]');
+    const amountEl = picker.querySelector('[data-token-summary-amount]');
+    const unitEl = picker.querySelector('[data-token-summary-unit]');
+
+    const sync = () => {
+        const selected = Array.from(radios).find((radio) => radio.checked);
+        if (!selected) return;
+
+        if (priceEl) priceEl.textContent = selected.dataset.tokenPrice || '';
+        if (amountEl) amountEl.textContent = `${selected.dataset.tokenAmount || 0} token`;
+        if (unitEl) unitEl.textContent = `@ ${selected.dataset.tokenUnit || ''} / token`;
+    };
+
+    radios.forEach((radio) => radio.addEventListener('change', sync));
+    sync();
 }
 
 function createLiveSignalChart(container, config) {

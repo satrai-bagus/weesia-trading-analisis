@@ -110,6 +110,7 @@ class DashboardController extends Controller
             'subscriptionUntil' => $user->subscription_until,
             'liveSession' => $this->upcomingLiveSession(),
             'archiveCount' => $archiveCount,
+            'alerts' => $this->alertsPayload(),
         ]);
     }
 

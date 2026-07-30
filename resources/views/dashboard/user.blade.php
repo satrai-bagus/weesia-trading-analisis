@@ -80,37 +80,17 @@
             <div class="pointer-events-none absolute -right-24 -top-10 h-72 w-72 rounded-full bg-gold-500/10 blur-[130px]"></div>
 
             <div class="relative mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-8">
-                <div class="reveal flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                    <div class="min-w-0">
-                        <div class="inline-flex w-fit items-center gap-3">
-                            <span class="h-px w-10 bg-gold-500/60"></span>
-                            <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Trader Desk</span>
-                        </div>
-                        <h1 class="mt-4 font-display text-3xl leading-[1.05] text-ink-50 sm:text-5xl">Meja Trader.</h1>
-                        <p class="mt-3 max-w-xl text-sm leading-relaxed text-ink-200 sm:text-base">Semua analisa live, level kunci, dan posisi kamu dalam satu layar - update harga real-time tiap 30 detik.</p>
+                <div class="reveal min-w-0">
+                    <div class="inline-flex w-fit items-center gap-3">
+                        <span class="h-px w-10 bg-gold-500/60"></span>
+                        <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Trader Desk</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        @if ($hasSubscription)
-                            <span class="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-200">
-                                <x-icon name="shield-check" class="h-3.5 w-3.5" />
-                                Subscriber s/d {{ $subscriptionUntil->format('d M Y') }}
-                            </span>
-                        @else
-                            <a href="{{ route('checkout') }}" class="inline-flex items-center gap-2 rounded-full border border-gold-500/30 bg-gold-500/10 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-gold-200 transition-all hover:border-gold-400/70 hover:text-gold-100">
-                                <x-icon name="wallet" class="h-3.5 w-3.5" />
-                                {{ number_format($coinBalance, 0, ',', '.') }} koin
-                            </a>
-                        @endif
-                        <a href="{{ route('user.archive') }}" class="inline-flex items-center gap-2 rounded-full border border-ink-600/70 bg-ink-800/60 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-200 transition-all hover:border-gold-500/50 hover:text-gold-100">
-                            <x-icon name="database" class="h-3.5 w-3.5" />
-                            Arsip ({{ $archiveCount }})
-                        </a>
-                        <a href="#signals" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-900 shadow-[0_10px_30px_-12px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_16px_44px_-14px_rgba(23,209,131,1)]">
-                            <x-icon name="target" class="h-3.5 w-3.5" />
-                            Analisa
-                        </a>
-                    </div>
+                    <h1 class="mt-4 font-display text-3xl leading-[1.05] text-ink-50 sm:text-5xl">Meja Trader.</h1>
+                    <p class="mt-3 max-w-xl text-sm leading-relaxed text-ink-200 sm:text-base">Semua analisa live, level kunci, dan posisi kamu dalam satu layar - update harga real-time tiap 30 detik.</p>
                 </div>
+
+                {{-- Notifikasi belum dibaca --}}
+                @include('dashboard.partials.alert-digest')
 
                 {{-- KPI strip --}}
                 <div class="reveal mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-ink-700/60 bg-ink-700/40 lg:grid-cols-4">
