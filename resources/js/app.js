@@ -28,8 +28,11 @@ ready(() => {
     setupAlertBell();
     setupAlertDigest();
     setupTokenPicker();
+    setupSettledPositions();
+    setupPositionPerformance();
     setupModals();
     setupUnlockConfirm();
+    setupPositionEntryModal();
     setupLivePriceCards();
     setupSignalLiveRoi();
     setupUserEntryTracker();
@@ -820,10 +823,17 @@ function setupUserEntryTracker() {
         const storageKey = `weesia.entry.${signalId}`;
         const input = tracker.querySelector('[data-entry-input]');
 
-        try {
-            const stored = localStorage.getItem(storageKey);
-            if (stored && input) input.value = stored;
-        } catch { /* localStorage may be unavailable */ }
+        // Entry yang tersimpan di database (dipakai statistik performa) menang
+        // atas coretan what-if di localStorage.
+        const savedEntry = Number(tracker.dataset.signalSavedEntry);
+        if (savedEntry > 0 && input) {
+            input.value = String(savedEntry);
+        } else {
+            try {
+                const stored = localStorage.getItem(storageKey);
+                if (stored && input) input.value = stored;
+            } catch { /* localStorage may be unavailable */ }
+        }
 
         input?.addEventListener('input', () => {
             try { localStorage.setItem(storageKey, input.value); } catch { /* ignore */ }
@@ -1021,6 +1031,62 @@ function setupUnlockConfirm() {
 
             modal.removeAttribute('hidden');
             document.body.style.overflow = 'hidden';
+        });
+    });
+}
+
+// Modal "Pasang Posisi": memasang analisa sebagai posisi wajib menyertakan
+// harga entry pribadi karena statistik performa dihitung dari harga itu.
+function setupPositionEntryModal() {
+    const modal = document.querySelector('[data-modal="position-entry"]');
+    if (!modal) return;
+
+    const tickerEl = modal.querySelector('[data-position-entry-ticker]');
+    const sideEl = modal.querySelector('[data-position-entry-side]');
+    const input = modal.querySelector('[data-position-entry-input]');
+    const form = modal.querySelector('[data-position-entry-form]');
+    const liveBtn = modal.querySelector('[data-position-entry-live]');
+    const liveValueEl = modal.querySelector('[data-position-entry-live-value]');
+
+    let livePrice = null;
+
+    // Harga live ikut polling 30 detik, bukan snapshot saat halaman dimuat -
+    // tanpa ini tombol "Pakai harga live" bisa mengisi harga lama ke statistik.
+    const lastPrices = new Map();
+    window.addEventListener('weesia:prices', (event) => {
+        Object.entries(event.detail || {}).forEach(([ticker, price]) => {
+            const num = Number(price);
+            if (Number.isFinite(num) && num > 0) lastPrices.set(ticker, num);
+        });
+    });
+
+    liveBtn?.addEventListener('click', () => {
+        if (!input || !livePrice) return;
+        input.value = String(livePrice);
+        input.focus();
+    });
+
+    document.querySelectorAll('[data-position-entry-trigger]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const side = btn.dataset.signalSide || '';
+            const leverage = btn.dataset.signalLeverage || '';
+            const saved = Number(btn.dataset.signalEntry);
+            const attrLive = Number(btn.dataset.signalLive);
+            livePrice = lastPrices.get(btn.dataset.signalTicker) ?? (attrLive > 0 ? attrLive : null);
+
+            if (tickerEl) tickerEl.textContent = btn.dataset.signalTicker || '-';
+            if (sideEl) sideEl.textContent = side && leverage ? `${side} ${leverage}x` : side;
+            if (form) form.action = btn.dataset.signalAction || '';
+            if (input) input.value = saved > 0 ? String(saved) : (livePrice ? String(livePrice) : '');
+            if (liveBtn) {
+                liveBtn.classList.toggle('hidden', !livePrice);
+                liveBtn.classList.toggle('inline-flex', Boolean(livePrice));
+                if (liveValueEl && livePrice) liveValueEl.textContent = String(livePrice);
+            }
+
+            modal.removeAttribute('hidden');
+            document.body.style.overflow = 'hidden';
+            input?.focus();
         });
     });
 }
@@ -1252,6 +1318,438 @@ function setupAlertDigest() {
 
     window.addEventListener('weesia:alerts', (event) => {
         render(event.detail);
+    });
+}
+
+// Kartu "Performa Posisi": KPI tiles + kurva akumulasi ROI di canvas.
+// Filter rentang waktu men-scope tiles, grafik, dan tabel sekaligus supaya
+// semua angka selalu berasal dari irisan data yang sama.
+function setupPositionPerformance() {
+    const root = document.querySelector('[data-position-performance]');
+    if (!root) return;
+
+    let series = [];
+    try {
+        series = JSON.parse(root.querySelector('[data-perf-data]')?.textContent || '[]');
+    } catch { series = []; }
+    if (!Array.isArray(series) || !series.length) return;
+
+    const chartHost = root.querySelector('[data-perf-chart]');
+    const canvas = chartHost?.querySelector('canvas');
+    const ctx = canvas?.getContext('2d');
+    if (!chartHost || !canvas || !ctx) return;
+
+    const tooltip = chartHost.querySelector('[data-perf-tooltip]');
+    const tooltipCum = tooltip?.querySelector('[data-perf-tooltip-cum]');
+    const tooltipRoi = tooltip?.querySelector('[data-perf-tooltip-roi]');
+    const tooltipMeta = tooltip?.querySelector('[data-perf-tooltip-meta]');
+    const emptyNote = chartHost.querySelector('[data-perf-chart-empty]');
+
+    const headline = root.querySelector('[data-perf-headline]');
+    const winrateEl = root.querySelector('[data-perf-winrate]');
+    const winrateSubEl = root.querySelector('[data-perf-winrate-sub]');
+    const totalEl = root.querySelector('[data-perf-total]');
+    const totalSubEl = root.querySelector('[data-perf-total-sub]');
+    const avgEl = root.querySelector('[data-perf-avg]');
+    const pfEl = root.querySelector('[data-perf-pf]');
+    const extremesEl = root.querySelector('[data-perf-extremes]');
+    const bestEl = root.querySelector('[data-perf-best]');
+    const worstEl = root.querySelector('[data-perf-worst]');
+    const tableRows = Array.from(root.querySelectorAll('[data-perf-row]'));
+
+    const COLORS = {
+        line: '#17d183',
+        washUp: 'rgba(23, 209, 131, 0.10)',
+        washDown: 'rgba(244, 63, 94, 0.10)',
+        grid: '#1a1a17',
+        zero: '#2a2925',
+        axisText: '#8a877e',
+        surface: '#0a0a09',
+        label: '#f5f3ee',
+    };
+    const AXIS_FONT = '10px "JetBrains Mono", ui-monospace, monospace';
+
+    const trim = (value) => Number(value.toFixed(2));
+    const fmtPercent = (value) => `${value > 0 ? '+' : ''}${trim(value).toLocaleString('en-US')}%`;
+    const fmtDate = (ts) => new Date(ts).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    const setSign = (el, isUp, strong) => {
+        if (!el) return;
+        el.classList.toggle(strong ? 'text-emerald-300' : 'text-emerald-200', isUp);
+        el.classList.toggle(strong ? 'text-rose-300' : 'text-rose-200', !isUp);
+    };
+
+    let rangeDays = null; // null = semua waktu
+    let view = [];
+    let hoverIndex = -1;
+    let layout = null;
+
+    const cutoffTs = () => (rangeDays === null ? -Infinity : Date.now() - rangeDays * 86400000);
+
+    // Kumulatif dihitung ulang dari nol di dalam rentang, supaya kurva menjawab
+    // "bagaimana performaku DI periode ini", konsisten dengan tiles-nya.
+    const applyRange = () => {
+        const cutoff = cutoffTs();
+        let cum = 0;
+        view = series
+            .filter((point) => point.ts >= cutoff)
+            .map((point) => {
+                cum += point.roi;
+                return { ...point, cum: trim(cum) };
+            });
+        hoverIndex = -1;
+    };
+
+    const updateTiles = () => {
+        const count = view.length;
+        const rois = view.map((point) => point.roi);
+        const wins = rois.filter((roi) => roi >= 0);
+        const losses = rois.filter((roi) => roi < 0);
+        const total = rois.reduce((sum, roi) => sum + roi, 0);
+        const grossProfit = wins.reduce((sum, roi) => sum + roi, 0);
+        const grossLoss = Math.abs(losses.reduce((sum, roi) => sum + roi, 0));
+        const isUp = total >= 0;
+
+        if (headline) {
+            const scope = rangeDays === null ? 'Sejauh ini' : 'Di rentang ini';
+            headline.textContent = count
+                ? `${scope} posisi kamu ${isUp ? 'untung' : 'rugi'} ${fmtPercent(total)} dari ${count} posisi selesai.`
+                : 'Tidak ada posisi selesai di rentang waktu ini.';
+            setSign(headline, count ? isUp : true, false);
+        }
+        if (winrateEl) winrateEl.textContent = count ? `${trim((wins.length / count) * 100)}%` : '-';
+        if (winrateSubEl) winrateSubEl.textContent = `${wins.length} menang · ${losses.length} rugi`;
+        if (totalEl) {
+            totalEl.textContent = count ? fmtPercent(total) : '-';
+            setSign(totalEl, isUp, true);
+        }
+        if (totalSubEl) totalSubEl.textContent = `${count} posisi selesai`;
+        if (avgEl) {
+            avgEl.textContent = count ? fmtPercent(total / count) : '-';
+            setSign(avgEl, count ? total / count >= 0 : true, true);
+        }
+        if (pfEl) {
+            pfEl.textContent = grossLoss > 0
+                ? trim(grossProfit / grossLoss).toLocaleString('en-US')
+                : (wins.length ? '∞' : '-');
+        }
+
+        if (extremesEl) {
+            if (!count) {
+                extremesEl.classList.add('hidden');
+            } else {
+                extremesEl.classList.remove('hidden');
+                const best = view.reduce((a, b) => (b.roi > a.roi ? b : a));
+                const worst = view.reduce((a, b) => (b.roi < a.roi ? b : a));
+                if (bestEl) bestEl.textContent = `${best.ticker} ${fmtPercent(best.roi)}`;
+                if (worstEl) worstEl.textContent = `${worst.ticker} ${fmtPercent(worst.roi)}`;
+            }
+        }
+    };
+
+    const updateTable = () => {
+        const cutoff = cutoffTs();
+        tableRows.forEach((row) => {
+            row.classList.toggle('hidden', Number(row.dataset.ts) < cutoff);
+        });
+    };
+
+    const niceStep = (rough) => {
+        const power = Math.pow(10, Math.floor(Math.log10(rough)));
+        const unit = rough / power;
+        if (unit <= 1) return power;
+        if (unit <= 2) return 2 * power;
+        if (unit <= 5) return 5 * power;
+        return 10 * power;
+    };
+
+    const hideTooltip = () => {
+        if (tooltip) tooltip.hidden = true;
+    };
+
+    const draw = () => {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = chartHost.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        if (!w || !h) return;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        if (!view.length) {
+            if (emptyNote) emptyNote.hidden = false;
+            hideTooltip();
+            layout = null;
+            return;
+        }
+        if (emptyNote) emptyNote.hidden = true;
+
+        const padL = 56;
+        const padR = 18;
+        const padT = 16;
+        const padB = 30;
+        const plotW = Math.max(w - padL - padR, 10);
+        const plotH = Math.max(h - padT - padB, 10);
+
+        const values = view.map((point) => point.cum);
+        let minV = Math.min(0, ...values);
+        let maxV = Math.max(0, ...values);
+        if (minV === maxV) maxV = minV + 1;
+        const breathing = (maxV - minV) * 0.08;
+        minV -= breathing;
+        maxV += breathing;
+
+        const minTs = view[0].ts;
+        const maxTs = view[view.length - 1].ts;
+        const tsSpan = Math.max(maxTs - minTs, 1);
+        const xFor = (point) => (view.length === 1
+            ? padL + plotW / 2
+            : padL + ((point.ts - minTs) / tsSpan) * plotW);
+        const yFor = (value) => padT + ((maxV - value) / (maxV - minV)) * plotH;
+
+        // Grid + label sumbu Y: hairline solid satu langkah dari surface.
+        const step = niceStep((maxV - minV) / 4);
+        ctx.font = AXIS_FONT;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.lineWidth = 1;
+        for (let tick = Math.ceil(minV / step) * step; tick <= maxV; tick += step) {
+            const yPix = Math.round(yFor(tick)) + 0.5;
+            ctx.strokeStyle = COLORS.grid;
+            ctx.beginPath();
+            ctx.moveTo(padL, yPix);
+            ctx.lineTo(padL + plotW, yPix);
+            ctx.stroke();
+            ctx.fillStyle = COLORS.axisText;
+            ctx.fillText(`${trim(tick).toLocaleString('en-US')}%`, padL - 8, yPix);
+        }
+
+        // Garis nol: acuan polaritas, sedikit lebih tegas dari grid.
+        const zeroY = Math.round(yFor(0)) + 0.5;
+        ctx.strokeStyle = COLORS.zero;
+        ctx.beginPath();
+        ctx.moveTo(padL, zeroY);
+        ctx.lineTo(padL + plotW, zeroY);
+        ctx.stroke();
+
+        // Label sumbu X: awal, tengah, akhir rentang (indeks di-dedup supaya
+        // 1-2 titik tidak menggambar tanggal yang sama dua kali).
+        ctx.textBaseline = 'top';
+        const tickIndexes = [...new Set([0, Math.floor((view.length - 1) / 2), view.length - 1])];
+        tickIndexes.forEach((viewIndex, index) => {
+            ctx.textAlign = tickIndexes.length === 1
+                ? 'center'
+                : (index === 0 ? 'left' : (index === tickIndexes.length - 1 ? 'right' : 'center'));
+            ctx.fillStyle = COLORS.axisText;
+            ctx.fillText(fmtDate(view[viewIndex].ts), xFor(view[viewIndex]), padT + plotH + 10);
+        });
+
+        const points = view.map((point) => ({ x: xFor(point), y: yFor(point.cum) }));
+
+        // Area wash: hijau di atas nol, rose di bawah nol - polaritas dibawa oleh
+        // posisi terhadap garis nol, warna hanya penguat.
+        const areaPath = () => {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, zeroY);
+            points.forEach((p) => ctx.lineTo(p.x, p.y));
+            ctx.lineTo(points[points.length - 1].x, zeroY);
+            ctx.closePath();
+        };
+        if (view.length > 1) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(padL, padT, plotW, Math.max(zeroY - padT, 0));
+            ctx.clip();
+            areaPath();
+            ctx.fillStyle = COLORS.washUp;
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(padL, zeroY, plotW, Math.max(padT + plotH - zeroY, 0));
+            ctx.clip();
+            areaPath();
+            ctx.fillStyle = COLORS.washDown;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Garis utama: 2px, satu seri, warna konstan.
+        ctx.strokeStyle = COLORS.line;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        points.forEach((p, index) => (index === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+        ctx.stroke();
+
+        // Crosshair + marker hover (ring 2px warna surface biar tetap terbaca).
+        if (hoverIndex >= 0 && hoverIndex < points.length) {
+            const hp = points[hoverIndex];
+            ctx.strokeStyle = COLORS.zero;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(Math.round(hp.x) + 0.5, padT);
+            ctx.lineTo(Math.round(hp.x) + 0.5, padT + plotH);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(hp.x, hp.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = COLORS.line;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = COLORS.surface;
+            ctx.stroke();
+        }
+
+        // Titik + label akhir (direct label selektif: hanya endpoint).
+        const last = points[points.length - 1];
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = COLORS.line;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = COLORS.surface;
+        ctx.stroke();
+        ctx.font = AXIS_FONT;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillStyle = COLORS.label;
+        ctx.fillText(fmtPercent(view[view.length - 1].cum), Math.min(last.x, padL + plotW), Math.max(last.y - 8, padT + 10));
+
+        layout = { points, padT, plotH, w };
+
+        // Redraw tanpa hover aktif (ganti rentang, resize) tidak boleh
+        // meninggalkan tooltip berisi data lama.
+        if (hoverIndex < 0) hideTooltip();
+    };
+
+    const showTooltip = (index) => {
+        if (!tooltip || !layout || index < 0 || index >= view.length) return;
+        const point = view[index];
+        const pix = layout.points[index];
+
+        if (tooltipCum) tooltipCum.textContent = fmtPercent(point.cum);
+        if (tooltipRoi) {
+            tooltipRoi.textContent = `ROI posisi ${fmtPercent(point.roi)} · ${point.ticker}`;
+            tooltipRoi.classList.toggle('text-emerald-300', point.roi >= 0);
+            tooltipRoi.classList.toggle('text-rose-300', point.roi < 0);
+        }
+        if (tooltipMeta) tooltipMeta.textContent = `${point.side} ${point.leverage}x · ${point.status} · ${point.label}`;
+
+        tooltip.hidden = false;
+        const tw = tooltip.offsetWidth;
+        const left = Math.min(Math.max(pix.x + 14, 8), layout.w - tw - 8);
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = '8px';
+    };
+
+    const setHover = (index) => {
+        hoverIndex = index;
+        draw();
+        if (index >= 0) {
+            showTooltip(index);
+        } else {
+            hideTooltip();
+        }
+    };
+
+    const nearestIndex = (clientX) => {
+        if (!layout) return -1;
+        const rect = canvas.getBoundingClientRect();
+        const xPix = clientX - rect.left;
+        let best = -1;
+        let bestDist = Infinity;
+        layout.points.forEach((p, index) => {
+            const dist = Math.abs(p.x - xPix);
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = index;
+            }
+        });
+        return best;
+    };
+
+    canvas.addEventListener('pointermove', (event) => setHover(nearestIndex(event.clientX)));
+    canvas.addEventListener('pointerleave', () => setHover(-1));
+    canvas.addEventListener('focus', () => {
+        // Hanya fokus keyboard yang membuka titik terakhir; klik mouse juga
+        // memicu focus dan tidak boleh merebut hover yang sedang aktif.
+        let keyboardFocus = true;
+        try { keyboardFocus = canvas.matches(':focus-visible'); } catch { /* selector lama */ }
+        if (keyboardFocus && hoverIndex < 0) setHover(view.length - 1);
+    });
+    canvas.addEventListener('blur', () => setHover(-1));
+    canvas.addEventListener('keydown', (event) => {
+        if (!view.length) return;
+        const current = hoverIndex < 0 ? view.length - 1 : hoverIndex;
+        if (event.key === 'ArrowLeft') setHover(Math.max(current - 1, 0));
+        else if (event.key === 'ArrowRight') setHover(Math.min(current + 1, view.length - 1));
+        else if (event.key === 'Home') setHover(0);
+        else if (event.key === 'End') setHover(view.length - 1);
+        else if (event.key === 'Escape') setHover(-1);
+        else return;
+        event.preventDefault();
+    });
+
+    const rangeButtons = Array.from(root.querySelectorAll('[data-perf-range]'));
+    rangeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const key = button.getAttribute('data-perf-range');
+            rangeDays = key === 'all' ? null : Number(key);
+            rangeButtons.forEach((btn) => {
+                const active = btn === button;
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                btn.classList.toggle('border-gold-500/50', active);
+                btn.classList.toggle('bg-gold-500/15', active);
+                btn.classList.toggle('text-gold-100', active);
+                btn.classList.toggle('border-ink-700/70', !active);
+                btn.classList.toggle('bg-ink-800/50', !active);
+                btn.classList.toggle('text-ink-300', !active);
+            });
+            applyRange();
+            updateTiles();
+            updateTable();
+            draw();
+        });
+    });
+
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(() => draw()).observe(chartHost);
+    } else {
+        window.addEventListener('resize', () => draw());
+    }
+
+    applyRange();
+    draw();
+}
+
+// Notifikasi hasil posisi: lengkapi tiap kartu dengan P/L versi entry pribadi
+// user (tersimpan di localStorage lewat kalkulator P/L), lalu bersihkan catatan
+// entry itu begitu hasilnya ditandai sudah dibaca.
+// Kartu hasil posisi sudah dirender lengkap oleh server (ROI pribadi dari
+// entry yang tersimpan di database). JS hanya membersihkan coretan what-if
+// kalkulator di localStorage begitu hasilnya ditandai dibaca.
+function setupSettledPositions() {
+    const items = Array.from(document.querySelectorAll('[data-settled-item]'));
+    if (!items.length) {
+        return;
+    }
+
+    const forgetEntry = (signalId) => {
+        try {
+            localStorage.removeItem(`weesia.entry.${signalId}`);
+        } catch { /* localStorage may be unavailable */ }
+    };
+
+    items.forEach((item) => {
+        item.querySelector('[data-settled-dismiss]')?.addEventListener('submit', () => forgetEntry(item.dataset.signalId));
+    });
+
+    document.querySelector('[data-settled-clear-all]')?.addEventListener('submit', () => {
+        items.forEach((item) => forgetEntry(item.dataset.signalId));
     });
 }
 

@@ -228,14 +228,18 @@
 
                                     <div class="mt-auto flex items-center justify-between gap-2 border-t border-ink-700/50 pt-3">
                                         <div class="flex items-center gap-1.5">
-                                            <form method="POST" action="{{ route('signals.positions.store', $signal) }}">
-                                                @csrf
-                                                <input type="hidden" name="type" value="{{ \App\Models\UserSignalPosition::TYPE_POSITION }}">
-                                                <button type="submit" title="Tandai sebagai posisi" class="inline-flex h-9 items-center gap-1.5 rounded-xl border px-2.5 font-mono text-[9px] uppercase tracking-[0.12em] transition-colors {{ $selection?->type === \App\Models\UserSignalPosition::TYPE_POSITION ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-100' : 'border-ink-600/70 text-ink-300 hover:border-emerald-500/40 hover:text-emerald-100' }}">
-                                                    <x-icon name="target" class="h-3.5 w-3.5" />
-                                                    Posisi
-                                                </button>
-                                            </form>
+                                            <button type="button" title="Tandai sebagai posisi"
+                                                    data-position-entry-trigger
+                                                    data-signal-ticker="{{ $signal->ticker }}"
+                                                    data-signal-side="{{ $signal->sideLabel() }}"
+                                                    data-signal-leverage="{{ $signal->leverageValue() }}"
+                                                    data-signal-live="{{ $liveFor($signal) }}"
+                                                    data-signal-entry="{{ $selection?->entry_price }}"
+                                                    data-signal-action="{{ route('signals.positions.store', $signal) }}"
+                                                    class="inline-flex h-9 items-center gap-1.5 rounded-xl border px-2.5 font-mono text-[9px] uppercase tracking-[0.12em] transition-colors {{ $selection?->type === \App\Models\UserSignalPosition::TYPE_POSITION ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-100' : 'border-ink-600/70 text-ink-300 hover:border-emerald-500/40 hover:text-emerald-100' }}">
+                                                <x-icon name="target" class="h-3.5 w-3.5" />
+                                                Posisi
+                                            </button>
                                             <form method="POST" action="{{ route('signals.positions.store', $signal) }}">
                                                 @csrf
                                                 <input type="hidden" name="type" value="{{ \App\Models\UserSignalPosition::TYPE_WATCHLIST }}">
@@ -548,7 +552,8 @@
                              data-signal-ticker="{{ $signal->ticker }}"
                              data-signal-side="{{ $signal->position_side }}"
                              data-signal-leverage="{{ $signal->leverageValue() }}"
-                             data-signal-live="{{ $liveFor($signal) }}">
+                             data-signal-live="{{ $liveFor($signal) }}"
+                             data-signal-saved-entry="{{ $selection?->type === \App\Models\UserSignalPosition::TYPE_POSITION ? $selection?->entry_price : '' }}">
                             <div class="flex items-center gap-2">
                                 <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gold-500/30 bg-gold-500/10 text-gold-200">
                                     <x-icon name="target" class="h-4 w-4" />
@@ -561,6 +566,9 @@
                                 <label class="block">
                                     <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-300">Harga Entry Kamu (USD)</span>
                                     <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $liveRefFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                    @if ($selection?->type === \App\Models\UserSignalPosition::TYPE_POSITION && $selection?->entry_price)
+                                        <span class="mt-1.5 block font-mono text-[9px] uppercase tracking-[0.18em] text-emerald-300/80">Entry tersimpan: ${{ $fmt($selection->entry_price) }} - ubah lewat tombol Posisi</span>
+                                    @endif
                                 </label>
                                 <div data-entry-result class="rounded-2xl border border-ink-700 bg-ink-900 p-3">
                                     <div class="flex items-center justify-between gap-2">
@@ -586,14 +594,18 @@
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2 min-[420px]:flex-row">
-                                <form method="POST" action="{{ route('signals.positions.store', $signal) }}">
-                                    @csrf
-                                    <input type="hidden" name="type" value="{{ \App\Models\UserSignalPosition::TYPE_POSITION }}">
-                                    <button type="submit" class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors min-[420px]:w-auto {{ $selection?->type === \App\Models\UserSignalPosition::TYPE_POSITION ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-100' : 'border-ink-600/70 text-ink-200 hover:border-emerald-500/40 hover:text-emerald-100' }}">
-                                        <x-icon name="target" class="h-4 w-4" />
-                                        Posisi
-                                    </button>
-                                </form>
+                                <button type="button"
+                                        data-position-entry-trigger
+                                        data-signal-ticker="{{ $signal->ticker }}"
+                                        data-signal-side="{{ $signal->sideLabel() }}"
+                                        data-signal-leverage="{{ $signal->leverageValue() }}"
+                                        data-signal-live="{{ $liveFor($signal) }}"
+                                        data-signal-entry="{{ $selection?->entry_price }}"
+                                        data-signal-action="{{ route('signals.positions.store', $signal) }}"
+                                        class="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors min-[420px]:w-auto {{ $selection?->type === \App\Models\UserSignalPosition::TYPE_POSITION ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-100' : 'border-ink-600/70 text-ink-200 hover:border-emerald-500/40 hover:text-emerald-100' }}">
+                                    <x-icon name="target" class="h-4 w-4" />
+                                    Posisi
+                                </button>
                                 <form method="POST" action="{{ route('signals.positions.store', $signal) }}">
                                     @csrf
                                     <input type="hidden" name="type" value="{{ \App\Models\UserSignalPosition::TYPE_WATCHLIST }}">
@@ -620,6 +632,8 @@
         @endforeach
 
         {{-- ===== Fullscreen chart modal ===== --}}
+        @include('dashboard.partials.position-entry-modal')
+
         <div data-modal="fullscreen-chart" hidden class="fixed inset-0 z-[80] bg-ink-900/95 p-3 backdrop-blur-xl sm:p-6">
             <div class="absolute left-3 top-3 z-10 max-w-[70vw] rounded-2xl border border-gold-500/20 bg-ink-900/80 px-3 py-2 backdrop-blur-md sm:left-6 sm:top-6 sm:px-4 sm:py-3">
                 <div data-fullscreen-ticker class="truncate font-display text-xl leading-none text-ink-50 sm:text-2xl"></div>

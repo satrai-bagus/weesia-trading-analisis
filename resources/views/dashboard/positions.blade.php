@@ -21,10 +21,12 @@
             $percent = fn ($value) => $value === null ? '-' : ($value > 0 ? '+' : '').rtrim(rtrim(number_format($value, 2, '.', ','), '0'), '.').'%';
             $roiTo = fn ($signal, $target) => $target ? $signal->leveragedMoveTo((float) $target, $liveRefFor($signal)) : null;
 
+            // $signalSelections hanya berisi posisi yang masih berjalan; yang sudah
+            // kena TP/SL pindah ke notifikasi hasil di atas daftar.
+            $settledSelections = $settledSelections ?? collect();
+            $settledCount = $settledSelections->count();
             $positionCount = $signalSelections->where('type', \App\Models\UserSignalPosition::TYPE_POSITION)->count();
             $watchlistCount = $signalSelections->where('type', \App\Models\UserSignalPosition::TYPE_WATCHLIST)->count();
-            $activeCount = $signalSelections->filter(fn ($s) => $s->tradeSignal && $s->tradeSignal->status === \App\Models\TradeSignal::STATUS_ACTIVE)->count();
-            $closedCount = $signalSelections->count() - $activeCount;
             $tickerFilters = $signalSelections->map(fn ($s) => $s->tradeSignal?->ticker)->filter()->unique()->values();
             $totalSelections = $signalSelections->count();
         @endphp
@@ -55,7 +57,7 @@
                             <span class="font-mono text-[10px] uppercase tracking-[0.3em] text-gold-300">Trader Desk</span>
                         </div>
                         <h1 class="mt-5 max-w-3xl font-display text-4xl leading-[1.05] text-ink-50 sm:text-6xl">Posisi Saya.</h1>
-                        <p class="mt-5 max-w-2xl text-base leading-relaxed text-ink-200">Meja kerja kamu - kumpulan analisa yang sudah kamu pasang sebagai posisi atau pantauan, dengan chart live, level kunci, dan kalkulator P/L pribadi di satu tempat.</p>
+                        <p class="mt-5 max-w-2xl text-base leading-relaxed text-ink-200">Meja kerja kamu - analisa yang masih berjalan sebagai posisi atau pantauan, dengan chart live, level kunci, dan kalkulator P/L pribadi di satu tempat. Begitu kena TP atau SL, hasilnya muncul sebagai notifikasi di atas.</p>
                     </div>
 
                     <div class="grid w-full grid-cols-2 gap-3 sm:grid-cols-4 lg:w-auto lg:max-w-xl">
@@ -69,11 +71,11 @@
                         </div>
                         <div class="rounded-2xl border border-ink-700/70 bg-ink-900/60 p-4 backdrop-blur-md">
                             <div class="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-300">Berjalan</div>
-                            <div class="mt-2 font-display text-3xl text-ink-50">{{ $activeCount }}</div>
+                            <div class="mt-2 font-display text-3xl text-ink-50">{{ $totalSelections }}</div>
                         </div>
-                        <div class="rounded-2xl border border-ink-700/70 bg-ink-900/60 p-4 backdrop-blur-md">
-                            <div class="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-300">Selesai</div>
-                            <div class="mt-2 font-display text-3xl text-ink-50">{{ $closedCount }}</div>
+                        <div class="rounded-2xl border p-4 backdrop-blur-md {{ $settledCount > 0 ? 'border-gold-500/30 bg-gold-500/10' : 'border-ink-700/70 bg-ink-900/60' }}">
+                            <div class="font-mono text-[9px] uppercase tracking-[0.22em] {{ $settledCount > 0 ? 'text-gold-200/80' : 'text-ink-300' }}">Perlu Ditinjau</div>
+                            <div class="mt-2 font-display text-3xl {{ $settledCount > 0 ? 'text-gold-200' : 'text-ink-50' }}">{{ $settledCount }}</div>
                         </div>
                     </div>
                 </div>
@@ -92,13 +94,24 @@
                 </div>
             @endif
 
+            {{-- Notifikasi posisi yang sudah kena TP/SL --}}
+            @include('dashboard.partials.settled-positions')
+
+            {{-- Rekap performa: winrate, akumulasi ROI, kurva per tanggal --}}
+            @include('dashboard.partials.position-performance')
+
             @if ($totalSelections === 0)
                 <div class="reveal rounded-2xl border border-dashed border-gold-500/25 bg-ink-900/60 p-10 text-center backdrop-blur-md sm:p-14">
                     <div class="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-gold-500/30 bg-gold-500/10 text-gold-200">
-                        <x-icon name="clipboard" class="h-7 w-7" />
+                        <x-icon name="{{ $settledCount > 0 ? 'check-circle' : 'clipboard' }}" class="h-7 w-7" />
                     </div>
-                    <h2 class="mt-6 font-display text-3xl text-ink-50">Meja kamu masih kosong.</h2>
-                    <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Pasang analisa sebagai <span class="text-emerald-200">Posisi</span> atau <span class="text-gold-200">Pantauan</span> dari halaman analisa, dan semua chart-nya akan tampil di sini.</p>
+                    @if ($settledCount > 0)
+                        <h2 class="mt-6 font-display text-3xl text-ink-50">Semua posisi kamu sudah selesai.</h2>
+                        <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Tidak ada posisi yang masih berjalan. Cek hasilnya di notifikasi atas, tandai sudah dibaca, lalu pasang analisa baru.</p>
+                    @else
+                        <h2 class="mt-6 font-display text-3xl text-ink-50">Meja kamu masih kosong.</h2>
+                        <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-300">Pasang analisa sebagai <span class="text-emerald-200">Posisi</span> atau <span class="text-gold-200">Pantauan</span> dari halaman analisa, dan semua chart-nya akan tampil di sini.</p>
+                    @endif
                     <a href="{{ route('user.dashboard') }}#signals" class="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-300 to-gold-500 px-6 py-3 text-sm font-semibold text-ink-900 shadow-[0_14px_44px_-16px_rgba(23,209,131,0.8)] transition-all hover:shadow-[0_20px_60px_-18px_rgba(23,209,131,1)]">
                         <x-icon name="target" class="h-4 w-4" />
                         Pilih Analisa
@@ -238,7 +251,8 @@
                                                 data-signal-ticker="{{ $signal->ticker }}"
                                                 data-signal-side="{{ $signal->position_side }}"
                                                 data-signal-leverage="{{ $signal->leverageValue() }}"
-                                                data-signal-live="{{ $liveFor($signal) }}">
+                                                data-signal-live="{{ $liveFor($signal) }}"
+                                                data-signal-saved-entry="{{ $selection->type === \App\Models\UserSignalPosition::TYPE_POSITION ? $selection->entry_price : '' }}">
                                                 <div class="flex items-center gap-2">
                                                     <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gold-500/30 bg-gold-500/10 text-gold-200">
                                                         <x-icon name="target" class="h-4 w-4" />
@@ -251,6 +265,9 @@
                                                     <label class="block">
                                                         <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-300">Harga Entry Kamu (USD)</span>
                                                         <input type="number" step="any" min="0" inputmode="decimal" data-entry-input placeholder="contoh: {{ $liveRefFor($signal) }}" class="mt-1 min-h-11 w-full rounded-xl border border-ink-700 bg-ink-900 px-3 font-mono text-sm text-ink-100 outline-none focus:border-gold-500/50">
+                                                        @if ($selection->type === \App\Models\UserSignalPosition::TYPE_POSITION && $selection->entry_price)
+                                                            <span class="mt-1.5 block font-mono text-[9px] uppercase tracking-[0.18em] text-emerald-300/80">Entry tersimpan: ${{ rtrim(rtrim(number_format((float) $selection->entry_price, 8, '.', ','), '0'), '.') }} - ubah lewat tombol Posisi</span>
+                                                        @endif
                                                     </label>
                                                     <div data-entry-result class="rounded-2xl border border-ink-700 bg-ink-900 p-3">
                                                         <div class="flex items-center justify-between gap-2">
@@ -272,14 +289,18 @@
                                                     <span class="ml-auto font-mono text-[9px] uppercase tracking-[0.22em] text-ink-300">{{ optional($selection->selected_at)->diffForHumans() ?? 'Baru' }}</span>
                                                 </div>
                                                 <div class="grid grid-cols-2 gap-2">
-                                                    <form method="POST" action="{{ route('signals.positions.store', $signal) }}">
-                                                        @csrf
-                                                        <input type="hidden" name="type" value="{{ \App\Models\UserSignalPosition::TYPE_POSITION }}">
-                                                        <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-3 text-sm font-medium transition-colors {{ $selection->type === \App\Models\UserSignalPosition::TYPE_POSITION ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-100' : 'border-ink-600/70 text-ink-200 hover:border-emerald-500/40 hover:text-emerald-100' }}">
-                                                            <x-icon name="target" class="h-4 w-4" />
-                                                            Posisi
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                            data-position-entry-trigger
+                                                            data-signal-ticker="{{ $signal->ticker }}"
+                                                            data-signal-side="{{ $signal->sideLabel() }}"
+                                                            data-signal-leverage="{{ $signal->leverageValue() }}"
+                                                            data-signal-live="{{ $liveFor($signal) }}"
+                                                            data-signal-entry="{{ $selection->entry_price }}"
+                                                            data-signal-action="{{ route('signals.positions.store', $signal) }}"
+                                                            class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-3 text-sm font-medium transition-colors {{ $selection->type === \App\Models\UserSignalPosition::TYPE_POSITION ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-100' : 'border-ink-600/70 text-ink-200 hover:border-emerald-500/40 hover:text-emerald-100' }}">
+                                                        <x-icon name="target" class="h-4 w-4" />
+                                                        Posisi
+                                                    </button>
                                                     <form method="POST" action="{{ route('signals.positions.store', $signal) }}">
                                                         @csrf
                                                         <input type="hidden" name="type" value="{{ \App\Models\UserSignalPosition::TYPE_WATCHLIST }}">
@@ -352,6 +373,8 @@
                 </div>
             @endif
         </section>
+
+        @include('dashboard.partials.position-entry-modal')
 
         <div data-modal="fullscreen-chart" hidden class="fixed inset-0 z-[80] bg-ink-900/95 p-3 backdrop-blur-xl sm:p-6">
             <div class="absolute left-3 top-3 z-10 max-w-[70vw] rounded-2xl border border-gold-500/20 bg-ink-900/80 px-3 py-2 backdrop-blur-md sm:left-6 sm:top-6 sm:px-4 sm:py-3">

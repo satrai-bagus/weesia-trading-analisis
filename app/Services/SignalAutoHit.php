@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\TradeSignal;
+use App\Models\UserSignalPosition;
 use Illuminate\Support\Collection;
 
 class SignalAutoHit
@@ -30,6 +31,12 @@ class SignalAutoHit
                 'status' => $newStatus,
                 'auto_hit_at' => now(),
             ])->save();
+
+            // Hasil yang berubah (mis. TP1 lanjut ke TP2 atau jatuh ke SL) harus
+            // muncul lagi sebagai notifikasi meski hasil lamanya sudah dibaca.
+            UserSignalPosition::where('trade_signal_id', $signal->id)
+                ->whereNotNull('dismissed_at')
+                ->update(['dismissed_at' => null]);
 
             $changed->push($signal);
         }

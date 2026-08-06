@@ -87,7 +87,10 @@ class DashboardController extends Controller
         $accessMap = $signals->mapWithKeys(fn ($signal) => [
             $signal->id => $hasSubscription || in_array($signal->id, $unlockedIds, true),
         ])->all();
+        // Baris yang sudah ditandai dibaca tidak lagi tampil di daftar "Posisi
+        // Kamu" dashboard (dulu hilang karena dihapus; kini soft-dismiss).
         $signalSelections = $user->signalPositions()
+            ->whereNull('dismissed_at')
             ->with('tradeSignal.createdBy')
             ->latest('selected_at')
             ->get();
@@ -211,8 +214,22 @@ class DashboardController extends Controller
                 || in_array((int) $sel->trade_signal_id, $unlockedIds, true),
         ])->all();
 
+        // Posisi yang sudah kena TP/SL dipindah ke notifikasi hasil di atas halaman,
+        // jadi daftar utama hanya berisi posisi yang masih berjalan. Hasil yang sudah
+        // ditandai dibaca (dismissed) tidak muncul di keduanya, tapi tetap dihitung
+        // di statistik performa.
+        $settledSelections = $signalSelections
+            ->filter(fn ($sel) => $sel->tradeSignal->isClosed() && ! $sel->isDismissed())
+            ->sortByDesc(fn ($sel) => $sel->tradeSignal->settledAt())
+            ->values();
+        $runningSelections = $signalSelections
+            ->reject(fn ($sel) => $sel->tradeSignal->isClosed())
+            ->values();
+
         return view('dashboard.positions', [
-            'signalSelections' => $signalSelections,
+            'signalSelections' => $runningSelections,
+            'settledSelections' => $settledSelections,
+            'performance' => app(\App\Services\PositionPerformance::class)->forUser($user),
             'priceMap' => $priceMap,
             'accessMap' => $accessMap,
             'hasSubscription' => $hasSubscription,

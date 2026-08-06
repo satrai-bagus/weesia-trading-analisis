@@ -160,4 +160,36 @@ class TradeSignal extends Model
             default => null,
         };
     }
+
+    /**
+     * ROI akhir analisa (sudah dikali leverage) dari entry ke harga penutupan.
+     * Null kalau analisa masih berjalan atau entry-nya tidak diisi admin.
+     */
+    public function resultRoi(): ?float
+    {
+        $close = $this->closePrice();
+
+        if (! $close || ! $this->entry_price) {
+            return null;
+        }
+
+        return $this->leveragedMoveTo($close, (float) $this->entry_price);
+    }
+
+    /** Pergerakan harga apa adanya, tanpa leverage. */
+    public function resultMove(): ?float
+    {
+        $roi = $this->resultRoi();
+
+        return $roi === null ? null : $roi / $this->leverageValue();
+    }
+
+    public function settledAt(): ?\Illuminate\Support\Carbon
+    {
+        if (! $this->isClosed()) {
+            return null;
+        }
+
+        return $this->auto_hit_at ?? $this->updated_at;
+    }
 }

@@ -7,11 +7,21 @@ use App\Models\TradeSignal;
 use App\Models\User;
 use App\Models\UserSignalPosition;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class UserSignalPositionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Tanpa fake, harga live asli membuat SignalAutoHit menutup signal dummy
+        // (TP-nya cuma 110) sehingga posisinya pindah ke daftar hasil selesai.
+        Http::fake();
+    }
 
     public function test_user_can_save_accessible_signal_as_position(): void
     {
@@ -25,6 +35,7 @@ class UserSignalPositionTest extends TestCase
             ->from('/user')
             ->post(route('signals.positions.store', $signal), [
                 'type' => UserSignalPosition::TYPE_POSITION,
+                'entry_price' => 101.5,
             ])
             ->assertRedirect('/user')
             ->assertSessionHas('status');
@@ -33,6 +44,65 @@ class UserSignalPositionTest extends TestCase
             'user_id' => $user->id,
             'trade_signal_id' => $signal->id,
             'type' => UserSignalPosition::TYPE_POSITION,
+            'entry_price' => 101.5,
+        ]);
+    }
+
+    public function test_saving_position_without_entry_price_is_rejected(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'subscription_until' => now()->addDay(),
+        ]);
+        $signal = $this->signal();
+
+        // Posisi wajib menyertakan harga entry - statistik dihitung darinya.
+        $this->actingAs($user)
+            ->from('/user')
+            ->post(route('signals.positions.store', $signal), [
+                'type' => UserSignalPosition::TYPE_POSITION,
+            ])
+            ->assertRedirect('/user')
+            ->assertSessionHasErrors('entry_price');
+
+        $this->assertDatabaseMissing('user_signal_positions', [
+            'user_id' => $user->id,
+            'trade_signal_id' => $signal->id,
+        ]);
+
+        // Pantauan tidak butuh harga entry.
+        $this->actingAs($user)
+            ->from('/user')
+            ->post(route('signals.positions.store', $signal), [
+                'type' => UserSignalPosition::TYPE_WATCHLIST,
+            ])
+            ->assertSessionHasNoErrors();
+    }
+
+    public function test_entry_price_outside_column_range_is_rejected_not_500(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'user',
+            'subscription_until' => now()->addDay(),
+        ]);
+        $signal = $this->signal();
+
+        // Melebihi decimal(20,8): tanpa rule between, MySQL strict melempar
+        // out-of-range dan user melihat error 500.
+        foreach (['1e300', '99999999999999', '1e-10'] as $bad) {
+            $this->actingAs($user)
+                ->from('/user')
+                ->post(route('signals.positions.store', $signal), [
+                    'type' => UserSignalPosition::TYPE_POSITION,
+                    'entry_price' => $bad,
+                ])
+                ->assertRedirect('/user')
+                ->assertSessionHasErrors('entry_price');
+        }
+
+        $this->assertDatabaseMissing('user_signal_positions', [
+            'user_id' => $user->id,
+            'trade_signal_id' => $signal->id,
         ]);
     }
 
@@ -69,6 +139,7 @@ class UserSignalPositionTest extends TestCase
 
         $this->actingAs($user)->post(route('signals.positions.store', $signal), [
             'type' => UserSignalPosition::TYPE_POSITION,
+            'entry_price' => 100,
         ]);
         $this->actingAs($user)->post(route('signals.positions.store', $signal), [
             'type' => UserSignalPosition::TYPE_WATCHLIST,

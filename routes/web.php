@@ -74,6 +74,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/signals/{tradeSignal}/unlock', [SignalUnlockController::class, 'unlock'])->name('signals.unlock');
     Route::post('/signals/{tradeSignal}/positions', [UserSignalPositionController::class, 'store'])->name('signals.positions.store');
     Route::delete('/signals/{tradeSignal}/positions', [UserSignalPositionController::class, 'destroy'])->name('signals.positions.destroy');
+    Route::delete('/posisi/selesai', [UserSignalPositionController::class, 'clearSettled'])->name('positions.settled.clear');
+    Route::delete('/posisi/selesai/{tradeSignal}', [UserSignalPositionController::class, 'dismissSettled'])->name('positions.settled.dismiss');
     Route::post('/alerts/seen', [AlertController::class, 'markSeen'])->name('alerts.seen');
     Route::post('/admin/wa/test', [WhatsAppTestController::class, 'send'])->name('wa.test');
 

@@ -89,9 +89,14 @@ class TradeSignalController extends Controller
             ],
         ]);
 
+        // Penutupan manual tetap diberi stempel waktu: settledAt() dan kurva
+        // performa user bergantung padanya - fallback updated_at bisa bergeser
+        // tiap kali signal diedit.
         $tradeSignal->forceFill([
             'status' => $validated['status'],
-            'auto_hit_at' => null,
+            'auto_hit_at' => $validated['status'] === TradeSignal::STATUS_ACTIVE
+                ? null
+                : ($tradeSignal->auto_hit_at ?? now()),
         ])->save();
 
         return back()->with('status', 'Status trading berhasil diperbarui.');
@@ -138,7 +143,9 @@ class TradeSignalController extends Controller
             'stop_loss' => (float) $validated['stop_loss'],
             'coin_cost' => $validated['coin_cost'] !== null ? (int) $validated['coin_cost'] : $tradeSignal->coin_cost,
             'status' => $validated['status'],
-            'auto_hit_at' => $validated['status'] === TradeSignal::STATUS_ACTIVE ? null : $tradeSignal->auto_hit_at,
+            'auto_hit_at' => $validated['status'] === TradeSignal::STATUS_ACTIVE
+                ? null
+                : ($tradeSignal->auto_hit_at ?? now()),
         ])->save();
 
         return back()->with('status', 'Signal '.$ticker.' berhasil diupdate.');
